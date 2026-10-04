@@ -61,3 +61,72 @@ if (_inspectionDays < 1) revert InvalidInspectionWindow(); // Bat buoc >= 24 gio
 
 ### 6. Ai phát hiện:
 **AI gợi ý qua prompt phản biện và Sinh viên thống nhất bổ sung vào mã nguồn.**
+
+---
+
+## LAB 09 — HỢP ĐỒNG ĐẦU TIÊN: KÉT TIẾT KIỆM CÓ KHÓA THỜI GIAN
+
+> **Ngày thực hiện:** 2026-10-04  
+> **Mục tiêu:** Học kỹ thuật từ `TimeLockVault.sol`, áp dụng vào `ProjectCore.sol`
+
+---
+
+## Lần 3 (Lab 09): So sánh bản AI sinh vs bản mẫu giảng viên — TimeLockVault
+
+### 1. Prompt:
+> *"Viết hợp đồng Solidity theo SPEC.md (5 quy tắc R1–R5 của két tiết kiệm), tuân thủ AGENTS.md: dùng ^0.8.20, error tùy biến, call thay transfer, Checks-Effects-Interactions, chú thích tiếng Việt không dấu."*
+
+### 2. AI trả về (bản ban đầu của nhóm):
+AI sinh ra hợp đồng khá tốt, tuy nhiên có một số điểm khác biệt so với bản mẫu:
+- Dùng `immutable` cho `owner` và `unlockTime` — tiết kiệm gas hơn bản mẫu nhưng không ảnh hưởng nghiệp vụ.
+- Dùng `error TransferFailed()` thay cho `require(ok, "Chuyen tien that bai")`.
+- **Thiếu hàm `timeLeft()`** — bản mẫu có hàm tiện ích này để người dùng tra cứu thời gian còn lại.
+
+### 3. Đánh giá:
+**Bản AI gần đúng nhưng thiếu hàm `timeLeft()` — đây là tính năng UX quan trọng.**
+
+### 4. Chỗ thiếu / cần sửa:
+| Điểm so sánh | Bản AI sinh | Bản mẫu giảng viên | Quyết định |
+| :--- | :--- | :--- | :--- |
+| `owner`, `unlockTime` | `immutable` | Biến thông thường | Giữ nguyên (không ảnh hưởng) |
+| Lỗi chuyển tiền | `error TransferFailed()` | `require(ok, "chuoi")` | Theo bản mẫu để đồng bộ |
+| Hàm tiện ích | Không có | `timeLeft()` | **Bổ sung vào** |
+| Chú thích | Có nhưng ngắn | Có giải thích 4 điểm kỹ thuật | Bổ sung giải thích |
+
+### 5. Cách sửa:
+Bổ sung hàm `timeLeft()` và chuẩn hóa theo bản mẫu:
+```solidity
+function timeLeft() external view returns (uint256) {
+    if (block.timestamp >= unlockTime) return 0;
+    return unlockTime - block.timestamp;
+}
+```
+
+### 6. Ai phát hiện:
+**Sinh viên tự phát hiện khi đối chiếu trực tiếp với bản mẫu của giảng viên.**
+
+---
+
+## Lần 4 (Lab 09): Áp dụng kỹ thuật TimeLockVault vào ProjectCore — Lỗi biên dịch
+
+### 1. Quá trình:
+Sau khi học `TimeLockVault.sol`, nhóm mở `contracts/project/ProjectCore.sol` để kiểm tra bản đã có từ Lab 08 có áp dụng đúng 4 kỹ thuật không.
+
+### 2. Kết quả kiểm tra:
+`ProjectCore.sol` đã biên dịch thành công trên Remix VM với trình biên dịch `0.8.20`.
+
+**4 kỹ thuật đối chiếu:**
+| Kỹ thuật | TimeLockVault | ProjectCore | Đạt? |
+| :--- | :--- | :--- | :---: |
+| Phân quyền rõ ràng | `owner` | `seller`, `buyer`, `arbiter` | ✅ |
+| `event` ghi nhận mọi thay đổi | `Deposited`, `Withdrawn` | `Funded`, `Completed`, `Disputed`, `Refunded`, `DisputeResolved` | ✅ |
+| `error` tùy biến thay chuỗi | `NotOwner()`, `StillLocked()` | `NotBuyer()`, `NotArbiter()`, `WrongAmount()` v.v. | ✅ |
+| Thứ tự Checks-Effects-Interactions | Đúng trong `withdraw()` | Đúng trong mọi hàm công khai | ✅ |
+
+### 3. Lỗi đã gặp và cách sửa trong quá trình viết:
+- **Lỗi**: Ban đầu `resolveDispute()` phát `emit DisputeResolved` sau khi đã gọi `_distributeFunds()` (vi phạm CEI do emit sau call).
+- **Sửa**: Chuyển `emit DisputeResolved` lên trước lệnh chuyển tiền trong `_distributeFunds()`.
+- **Kết quả**: Hợp đồng biên dịch không lỗi, logic CEI đúng chuẩn.
+
+### 4. Ai phát hiện:
+**Sinh viên tự kiểm tra và sửa trong quá trình đối chiếu với bản mẫu TimeLockVault.**
