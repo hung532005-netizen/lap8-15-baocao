@@ -69,3 +69,4 @@ hce-escrow-k58/
    - `_feeRecipient`: Địa chỉ ví Quỹ KTX
    - `_price`: Giá niêm yết (ví dụ `100000000000000000` Wei = 0.1 ETH)
    - `_inspectionDays`: `3` (ngày)
+[Check-in] Th�nh vi�n Nguy?n Van An (23K4300012) x�c nh?n quy?n c?ng t�c tr�n repo.
