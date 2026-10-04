@@ -1,14 +1,14 @@
-# SPEC — KTX Escrow (Ký Quỹ Mua Bán Đồ Cũ Sinh Viên)
+# SPEC — KTX Trường Bia (Ký Quỹ Mua Bán Đồ Cũ Sinh Viên)
 
-> **Phiên bản:** v0.1 (Lab 08)  
-> **Áp dụng cho:** Sinh viên nội trú KTX và sinh viên trường Đại học Kinh tế (HCE)  
+> **Phiên bản:** v0.2 (Lab 10)  
+> **Áp dụng cho:** Sinh viên nội trú KTX Trường Bia và sinh viên trường Đại học Kinh tế - Đại học Huế (HCE)  
 > **Mã nguồn:** `contracts/project/ProjectCore.sol`
 
 ---
 
 ## 1. Mục đích
 
-Hệ thống cung cấp cơ chế ký quỹ (escrow) tự động bằng Smart Contract cho sinh viên KTX mua bán, thanh lý đồ dùng học tập và sinh hoạt đã qua sử dụng, bảo đảm người mua chỉ mất tiền khi đã nhận và kiểm tra đồ đúng cam kết, đồng thời bảo vệ người bán không bị người mua chây ì giam vốn hoặc bùng tiền.
+Hệ thống cung cấp cơ chế ký quỹ (escrow) tự động bằng Smart Contract cho sinh viên KTX Trường Bia mua bán, thanh lý đồ dùng học tập và sinh hoạt đã qua sử dụng, bảo đảm người mua chỉ mất tiền khi đã nhận và kiểm tra đồ đúng cam kết, đồng thời bảo vệ người bán không bị người mua chây ì giam vốn hoặc bùng tiền.
 
 ---
 

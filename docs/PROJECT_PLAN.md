@@ -1,7 +1,7 @@
-# PROJECT PLAN — KTX Escrow (Ký Quỹ Mua Bán Đồ Cũ Sinh Viên)
+# PROJECT PLAN — KTX Trường Bia (Ký Quỹ Mua Bán Đồ Cũ Sinh Viên)
 
 > **Môn học:** ECO2432 – Web3 Starter & Phân Tích Kinh Tế Số  
-> **Chủ đề Phần N:** Chủ đề 1 — Ký quỹ mua bán đồ cũ KTX  
+> **Chủ đề Phần N:** Chủ đề 1 — Ký quỹ mua bán đồ cũ KTX Trường Bia (Đại học Huế)  
 > **Repository:** `hce-escrow-k58`  
 > **Mục tiêu xuyên suốt:** Xây dựng một sản phẩm ký quỹ phi tập trung có mô hình kinh tế bền vững, bảo vệ cả người mua và người bán sinh viên trong các giao dịch trao đổi tài sản cũ.
 

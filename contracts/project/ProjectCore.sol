@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-/// @title KTX Escrow - Hop dong ky quy mua ban do cu sinh vien
+/// @title KTX Truong Bia Escrow - Hop dong ky quy mua ban do cu sinh vien
 /// @notice Thuoc de tai 1 (Phan N) - Mon hoc ECO2432 Web3 Starter
 /// @dev Duoi 150 dong theo quy chuan, ap dung Checks-Effects-Interactions va custom errors.
 contract ProjectCore {

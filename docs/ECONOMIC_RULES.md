@@ -1,7 +1,7 @@
-# ECONOMIC RULES — KTX Escrow (Quy Tắc Kinh Tế & Thiết Kế Động Lực)
+# ECONOMIC RULES — KTX Trường Bia (Quy Tắc Kinh Tế & Thiết Kế Động Lực)
 
 > **Môn học:** ECO2432 – Web3 Starter & Phân Tích Kinh Tế Số  
-> **Dự án:** Hệ thống Ký quỹ Mua bán Đồ cũ KTX (`hce-escrow-k58`)  
+> **Dự án:** Hệ thống Ký quỹ Mua bán Đồ cũ KTX Trường Bia (`hce-escrow-k58`)  
 > **Nguyên lý thiết kế:** Cơ chế kinh tế phải triệt tiêu động cơ gian lận, bảo đảm chi phí cho hành vi xấu luôn cao hơn lợi ích thu được (Incentive Compatibility).
 
 ---

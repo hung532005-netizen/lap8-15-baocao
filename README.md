@@ -1,7 +1,7 @@
-# KTX Escrow — Sàn Ký Quỹ Mua Bán Đồ Cũ Sinh Viên
+# KTX Trường Bia — Sàn Ký Quỹ Mua Bán Đồ Cũ Sinh Viên
 
 > **Môn học:** ECO2432 – Web3 Starter & Phân Tích Kinh Tế Số  
-> **Chủ đề Phần N:** Chủ đề 1 — Ký quỹ mua bán đồ cũ KTX  
+> **Chủ đề Phần N:** Chủ đề 1 — Ký quỹ mua bán đồ cũ KTX Trường Bia (Đại học Huế)  
 > **Kho lưu trữ:** `hce-escrow-k58`  
 > **Mạng thử nghiệm:** Ethereum Sepolia / Base Sepolia  
 
@@ -10,16 +10,16 @@
 ## 🎯 BỐN CÂU HỎI CỐT LÕI (Chuẩn đầu ra Lab 08)
 
 ### 1. Nhóm làm gì?
-Xây dựng ứng dụng phi tập trung **KTX Escrow (DApp Ký quỹ)** dựa trên Smart Contract. Hệ thống đóng vai trò bên thứ ba độc lập tự động khóa tiền cọc thanh toán khi sinh viên mua bán đồ dùng cũ (giáo trình, quạt điện, bàn học, xe đạp...), và chỉ giải ngân cho người bán khi người mua đã trực tiếp kiểm tra và xác nhận nhận đồ thành công.
+Xây dựng ứng dụng phi tập trung **KTX Trường Bia Escrow (DApp Ký quỹ)** dựa trên Smart Contract. Hệ thống đóng vai trò bên thứ ba độc lập tự động khóa tiền cọc thanh toán khi sinh viên mua bán đồ dùng cũ (giáo trình, quạt điện, bàn học, xe đạp...), và chỉ giải ngân cho người bán khi người mua đã trực tiếp kiểm tra và xác nhận nhận đồ thành công.
 
 ### 2. Cho ai?
-Dành cho **sinh viên nội trú KTX và sinh viên trường Đại học Kinh tế (HCE)** tham gia vào thị trường mua bán, thanh lý vật dụng cũ trong khuôn viên trường và ký túc xá.
+Dành cho **sinh viên nội trú KTX Trường Bia và sinh viên trường Đại học Kinh tế - Đại học Huế (HCE)** tham gia vào thị trường mua bán, thanh lý vật dụng cũ trong khuôn viên trường và ký túc xá.
 
 ### 3. Quy tắc chính là gì?
 - **Khóa cọc an toàn:** Người mua nạp đúng $100\%$ số tiền niêm yết vào Smart Contract. Tiền nằm trong két ký quỹ on-chain, không ai (kể cả Admin) được tự ý rút.
-- **Xác nhận giải ngân:** Người mua nhận đồ thực tế, kiểm tra đúng chất lượng cam kết thì bấm **"Xác nhận đã nhận hàng"** $\rightarrow$ Hệ thống tự động chuyển $99\%$ tiền cho người bán và $1\%$ phí dịch vụ về quỹ hỗ trợ KTX.
+- **Xác nhận giải ngân:** Người mua nhận đồ thực tế, kiểm tra đúng chất lượng cam kết thì bấm **"Xác nhận đã nhận hàng"** $\rightarrow$ Hệ thống tự động chuyển $99\%$ tiền cho người bán và $1\%$ phí dịch vụ về quỹ hỗ trợ KTX Trường Bia.
 - **Tự động thanh toán chống giam vốn:** Sau thời hạn kiểm tra ($3\text{ ngày}$), nếu người mua không xác nhận cũng không khiếu nại, tiền tự động giải ngân cho người bán để bảo vệ người bán.
-- **Cơ chế khiếu nại & Trọng tài:** Nếu có gian lận hoặc hàng lỗi ngầm, một trong hai bên có quyền mở tranh chấp (`raiseDispute`) để trọng tài Ban đại diện KTX vào phân xử minh bạch.
+- **Cơ chế khiếu nại & Trọng tài:** Nếu có gian lận hoặc hàng lỗi ngầm, một trong hai bên có quyền mở tranh chấp (`raiseDispute`) để trọng tài Ban đại diện KTX Trường Bia vào phân xử minh bạch.
 
 ### 4. Thành viên và phân công trách nhiệm
 
@@ -78,13 +78,13 @@ hce-escrow-k58/
 
 | Giai đoạn | Sản phẩm bàn giao | Mô tả Nghiệp vụ & Kỹ thuật | Trạng thái |
 | :---: | :--- | :--- | :---: |
-| **Lab 8** | `README.md` · `AGENTS.md` · `docs/SPEC.md` | Khởi động đồ án Chủ đề 1 (KTX Escrow), xác định 4 câu hỏi cốt lõi, thiết lập cơ chế ký quỹ on-chain, phác thảo Smart Contract & bộ 3 ca kiểm thử (chuẩn / hoàn trả / gian lận) | ✅ **Hoàn thành** |
-| **Lab 9** | `docs/SPEC.md` · `docs/ECONOMIC_RULES.md` · `contracts/training/TimeLockVault.sol` | Đặc tả nghiệp vụ BA chi tiết cho KTX Escrow: máy trạng thái `AWAITING → LOCKED → RELEASED / DISPUTED / REFUNDED`, ma trận rủi ro và 4 quy tắc kinh tế | ✅ **Hoàn thành** |
-| **Lab 10** | `contracts/project/ProjectCore.sol` · `docs/AI_JOURNAL.md` | Viết & kiểm toán hợp đồng ký quỹ lõi (<150 dòng, CEI), rà soát mã AI sinh ra, phát hiện lỗ hổng Storage Slot & reentrancy, nâng cấp lên `ProjectCore v2` | ✅ **Hoàn thành** |
-| **Lab 11** | `web/index.html` · `docs/PRESENTATION_PLAN.md` | Xây dựng giao diện Web3 DApp: kết nối MetaMask, tích hợp Ethers.js v6, gọi hàm `confirmReceived` / `raiseDispute` / `refundBuyer`, hiển thị trạng thái hợp đồng real-time | ✅ **Hoàn thành** |
-| **Lab 12** | `test/ProjectCore.test.js` | Bộ kịch bản kiểm thử tự động toàn diện (Hardhat / Mocha): luồng chuẩn, chống gian lận người mua bùng tiền, tự động giải ngân sau 3 ngày, xử lý ngoại lệ biên | 🔄 **Sắp triển khai** |
-| **Lab 13** | `evidence/lab-13/` · `docs/AI_JOURNAL.md` | Tích hợp địa chỉ hợp đồng deploy Sepolia, kiểm tra end-to-end với MetaMask testnet, ghi lại hash giao dịch và ảnh chụp bằng chứng on-chain | 🔄 **Sắp triển khai** |
-| **Lab 14** | `web/index.html` (v2) · `evidence/lab-14/` | Hoàn thiện UX: thêm countdown 3 ngày kiểm tra, hiển thị lịch sử giao dịch, tối ưu gas estimate, hỗ trợ responsive mobile cho sinh viên dùng điện thoại | 🔄 **Sắp triển khai** |
-| **Lab 15** | Báo cáo tổng kết · Demo cuối kỳ | Tổng hợp toàn bộ sản phẩm, demo luồng ký quỹ hoàn chỉnh (Buyer → Lock → Inspect → Confirm → Release), phản biện câu hỏi kinh tế & bảo vệ đồ án | 🔄 **Sắp triển khai** |
+| **Lab 8** | `README.md` · `AGENTS.md` · `docs/SPEC.md` | Khởi động đồ án Chủ đề 1 (KTX Trường Bia Escrow), xác định 4 câu hỏi cốt lõi, thiết lập cơ chế ký quỹ on-chain, phác thảo Smart Contract & bộ 3 ca kiểm thử | ✅ **Hoàn thành** |
+| **Lab 9** | `contracts/training/TimeLockVault.sol` · `evidence/lab-09/` | Học kỹ thuật két khóa thời gian: Checks-Effects-Interactions, custom error, đo gas 4 thao tác trên Remix VM | ✅ **Hoàn thành** |
+| **Lab 10** | `contracts/project/ProjectCore.sol` · `evidence/lab-10/` · `docs/AI_JOURNAL.md` | Rà soát mã nguồn AI sinh ra: thực nghiệm đọc ô nhớ `private` bằng `eth_getStorageAt`, vá lỗi CEI và xung đột lợi ích trọng tài trong `ProjectCore` | ✅ **Hoàn thành** |
+| **Lab 11** | `contracts/project/ProjectCore.sol` · `docs/ECONOMIC_RULES.md` · `evidence/lab-11/` | Cài quy tắc kinh tế vào sản phẩm: phí nền tảng 1% (100 bps), trần giá giao dịch, kiểm thử 1 ca hợp lệ và 1 ca cố tình vi phạm | 🔄 **Sắp triển khai** |
+| **Lab 12** | `docs/GATE_REVIEW_1.md` · `docs/PROJECT_PLAN.md` | Gate Review 1 (Cổng duyệt bắt buộc): kiểm tra sức khỏe repo, demo 3 phút luồng cốt lõi và ca vi phạm bị chặn | 🔄 **Sắp triển khai** |
+| **Lab 13** | `contracts/training/VulnerableBank.sol` · `evidence/lab-13/` · `docs/AI_JOURNAL.md` | Thực nghiệm vụ mất tiền do lỗi Reentrancy (vụ The DAO 2016), viết ca kiểm thử tấn công và vá lỗi cho `ProjectCore` | 🔄 **Sắp triển khai** |
+| **Lab 14** | `docs/AUDIT_REPORT.md` | Rà soát chéo giữa các nhóm theo danh mục kiểm tra 10 hạng mục bắt buộc | 🔄 **Sắp triển khai** |
+| **Lab 15** | `web/index.html` · `docs/PRESENTATION_PLAN.md` | Giao diện Web3 DApp kết nối MetaMask, đưa lên mạng công khai GitHub Pages và kịch bản demo bảo vệ đồ án | 🔄 **Sắp triển khai** |
 
 > **Chú thích trạng thái:** ✅ Hoàn thành &nbsp;|&nbsp; 🔄 Sắp triển khai &nbsp;|&nbsp; ⏸ Tạm hoãn
