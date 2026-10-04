@@ -71,3 +71,4 @@ hce-escrow-k58/
    - `_inspectionDays`: `3` (ngÃ y)
 [Check-in] Thành viên Nguy?n Van An (23K4300012) xác nh?n quy?n c?ng tác trên repo.
 [Check-in] Thành viên Tr?n Th? Mai (23K4300045) xác nh?n quy?n c?ng tác trên repo.
+[Milestone] Hoàn thành Lab 08: Ðã th?ng nh?t d?c t? v0.1 và b? quy t?c kinh t?.
