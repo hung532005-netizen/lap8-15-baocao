@@ -2,7 +2,7 @@
 
 > **Môn học:** ECO2432 – Web3 Starter & Phân Tích Kinh Tế Số  
 > **Chủ đề Phần N:** Chủ đề 1 — Ký quỹ mua bán đồ cũ KTX  
-> **Kho lưu trữ nhóm:** `hce-escrow-k58`  
+> **Kho lưu trữ:** `hce-escrow-k58`  
 > **Mạng thử nghiệm:** Ethereum Sepolia / Base Sepolia  
 
 ---
@@ -10,7 +10,7 @@
 ## 🎯 BỐN CÂU HỎI CỐT LÕI (Chuẩn đầu ra Lab 08)
 
 ### 1. Nhóm làm gì?
-Nhóm xây dựng ứng dụng phi tập trung **KTX Escrow (DApp Ký quỹ)** dựa trên Smart Contract. Hệ thống đóng vai trò bên thứ ba độc lập tự động khóa tiền cọc thanh toán khi mua bán đồ dùng cũ (giáo trình, quạt điện, bàn học, xe đạp...), và chỉ giải ngân cho người bán khi người mua đã trực tiếp kiểm tra và xác nhận nhận đồ thành công.
+Xây dựng ứng dụng phi tập trung **KTX Escrow (DApp Ký quỹ)** dựa trên Smart Contract. Hệ thống đóng vai trò bên thứ ba độc lập tự động khóa tiền cọc thanh toán khi sinh viên mua bán đồ dùng cũ (giáo trình, quạt điện, bàn học, xe đạp...), và chỉ giải ngân cho người bán khi người mua đã trực tiếp kiểm tra và xác nhận nhận đồ thành công.
 
 ### 2. Cho ai?
 Dành cho **sinh viên nội trú KTX và sinh viên trường Đại học Kinh tế (HCE)** tham gia vào thị trường mua bán, thanh lý vật dụng cũ trong khuôn viên trường và ký túc xá.
@@ -21,13 +21,14 @@ Dành cho **sinh viên nội trú KTX và sinh viên trường Đại học Kinh
 - **Tự động thanh toán chống giam vốn:** Sau thời hạn kiểm tra ($3\text{ ngày}$), nếu người mua không xác nhận cũng không khiếu nại, tiền tự động giải ngân cho người bán để bảo vệ người bán.
 - **Cơ chế khiếu nại & Trọng tài:** Nếu có gian lận hoặc hàng lỗi ngầm, một trong hai bên có quyền mở tranh chấp (`raiseDispute`) để trọng tài Ban đại diện KTX vào phân xử minh bạch.
 
-### 4. Mỗi thành viên chịu trách nhiệm phần nào?
+### 4. Thành viên và phân công trách nhiệm
 
-| STT | Họ và tên | Mã sinh viên | Vai chính Lab 8–11 | Vai chính Lab 12–15 |
-| :---: | :--- | :---: | :--- | :--- |
-| 1 | **Lê Tiến Hùng** *(Trưởng nhóm)* | 23K4300007 | **Hợp đồng (Smart Contract)** & Quản lý | **Kiểm thử (Security & Audit)** |
-| 2 | **Nguyễn Văn An** | 23K4300012 | **Đặc tả (Spec)** & **Kiểm thử (Testing)** | **Hợp đồng (Smart Contract)** |
-| 3 | **Trần Thị Mai** | 23K4300045 | **Giao diện (Frontend DApp)** & Docs | **Giao diện (Frontend DApp)** |
+> **Hình thức thực hiện:** Dự án do **1 thành viên độc lập thực hiện**, kiêm nhiệm toàn bộ 4 vai trò của dự án (Đặc tả, Hợp đồng, Giao diện, Kiểm thử) xuyên suốt từ Lab 8 đến Lab 15.
+
+| STT | Họ và tên | Mã sinh viên | Lớp | Vai chính Lab 8–11 | Vai chính Lab 12–15 |
+| :---: | :--- | :---: | :---: | :--- | :--- |
+| **1** | **Lê Tiến Hùng** | **23K4300007** | Kinh tế số | **Hợp đồng & Đặc tả** (kiêm nhiệm toàn bộ) | **Kiểm thử & Giao diện** (kiêm nhiệm toàn bộ) |
+| **2** | *(Trống)* | - | - | *(Trống)* | *(Trống)* |
 
 ---
 
@@ -35,11 +36,12 @@ Dành cho **sinh viên nội trú KTX và sinh viên trường Đại học Kinh
 
 ```text
 hce-escrow-k58/
-├── README.md                 # Giới thiệu sản phẩm, 4 câu cốt lõi và hướng dẫn
+├── README.md                 # Giới thiệu sản phẩm, 4 câu cốt lõi và thông tin thành viên
 ├── AGENTS.md                 # Quy ước và tiêu chuẩn làm việc với công cụ AI
 ├── package.json              # Cấu hình dự án và dependencies
+├── prompt_templates.md       # Các mẫu câu lệnh AI có tiêu chí kiểm thử
 ├── docs/
-│   ├── PROJECT_PLAN.md       # Kế hoạch chi tiết, phân vai xoay vòng, 8 mốc dự án
+│   ├── PROJECT_PLAN.md       # Kế hoạch chi tiết, phân vai kiêm nhiệm, 8 mốc dự án
 │   ├── SPEC.md               # Đặc tả kỹ thuật v0.1 với 5 quy tắc và các ngoại lệ
 │   ├── ECONOMIC_RULES.md     # 4 mục quy tắc kinh tế + 5 phản biện & giải trình
 │   ├── AI_JOURNAL.md         # Nhật ký tương tác AI, lỗ hổng phát hiện và cách sửa
@@ -47,7 +49,7 @@ hce-escrow-k58/
 ├── contracts/
 │   ├── training/             # Bài mẫu học kỹ thuật (TimeLockVault, ClassPoint...)
 │   └── project/
-│       └── ProjectCore.sol   # Hợp đồng ký quỹ lõi (dưới 150 dòng, Checks-Effects-Interactions)
+│       └── ProjectCore.sol   # Hợp đồng ký quỹ lõi (<150 dòng, Checks-Effects-Interactions)
 ├── test/                     # Kịch bản kiểm thử luồng nghiệp vụ & gian lận
 ├── web/
 │   └── index.html            # Giao diện Web DApp tương tác ví MetaMask
@@ -69,6 +71,3 @@ hce-escrow-k58/
    - `_feeRecipient`: Địa chỉ ví Quỹ KTX
    - `_price`: Giá niêm yết (ví dụ `100000000000000000` Wei = 0.1 ETH)
    - `_inspectionDays`: `3` (ngày)
-[Check-in] Th�nh vi�n Nguy?n Van An (23K4300012) x�c nh?n quy?n c?ng t�c tr�n repo.
-[Check-in] Th�nh vi�n Tr?n Th? Mai (23K4300045) x�c nh?n quy?n c?ng t�c tr�n repo.
-[Milestone] Ho�n th�nh Lab 08: �� th?ng nh?t d?c t? v0.1 v� b? quy t?c kinh t?.

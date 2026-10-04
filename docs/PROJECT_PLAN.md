@@ -9,18 +9,17 @@
 
 ## 1. Thành viên và vai trò
 
-Nhóm gồm 3 thành viên, tuân thủ nguyên tắc: nhóm 3 người có 1 người kiêm hai vai, và các vai trò **phải xoay vòng ít nhất một lần trước Lab 15** để mọi thành viên đều có trải nghiệm toàn diện về đặc tả, hợp đồng, giao diện và kiểm thử.
+Dự án do **1 thành viên độc lập thực hiện**, kiêm nhiệm toàn bộ 4 vai trò (Đặc tả, Hợp đồng, Giao diện, Kiểm thử) xuyên suốt từ Lab 8 đến Lab 15:
 
-| Họ và tên | Mã sinh viên | Email / GitHub | Vai chính Lab 8–11 | Vai chính Lab 12–15 |
-| :--- | :--- | :--- | :--- | :--- |
-| **Lê Tiến Hùng** *(Nhóm trưởng)* | 23K4300007 | hung532005@gmail.com | **Hợp đồng (Smart Contract)** & Điều phối dự án | **Kiểm thử (Security & Testing)** & Tối ưu Gas |
-| **Nguyễn Văn An** | 23K4300012 | an.nguyen.k58@hce.edu.vn | **Đặc tả (Spec)** & **Kiểm thử (Testing)** | **Hợp đồng (Smart Contract)** & Refactor |
-| **Trần Thị Mai** | 23K4300045 | mai.tran.k58@hce.edu.vn | **Giao diện (Frontend DApp)** & Tài liệu | **Giao diện (Frontend DApp)** & **Đặc tả (Spec)** |
+| STT | Họ và tên | Mã sinh viên | Email / Lớp | Vai chính Lab 8–11 | Vai chính Lab 12–15 |
+| :---: | :--- | :---: | :---: | :--- | :--- |
+| **1** | **Lê Tiến Hùng** | **23K4300007** | hung532005@gmail.com / Kinh tế số | **Hợp đồng & Đặc tả** (kiêm nhiệm toàn bộ) | **Kiểm thử & Giao diện** (kiêm nhiệm toàn bộ) |
+| **2** | *(Trống)* | - | - | *(Trống)* | *(Trống)* |
 
-### Phân định trách nhiệm cụ thể của 4 vai:
-1. **Đặc tả (Specification Lead):** Chịu trách nhiệm viết và cập nhật `docs/SPEC.md`, `docs/ECONOMIC_RULES.md`, kiểm tra tính nhất quán logic giữa mô hình kinh tế và mã nguồn.
+### Phân định trách nhiệm kiêm nhiệm của 4 vai:
+1. **Đặc tả (Specification Lead):** Chịu trách nhiệm viết và cập nhật `docs/SPEC.md`, `docs/ECONOMIC_RULES.md`, bảo đảm tính nhất quán logic giữa mô hình kinh tế và mã nguồn.
 2. **Hợp đồng (Smart Contract Lead):** Hiện thực hóa mã nguồn Solidity tại `contracts/project/ProjectCore.sol`, bảo đảm tuân thủ quy chuẩn Checks-Effects-Interactions, tối ưu chi phí lưu trữ Storage (SSTORE) và Gas.
-3. **Giao diện (Frontend Lead):** Xây dựng giao diện web tương tác tại `web/index.html` kết nối thư viện `ethers.js` / Web3 provider, tích hợp ví MetaMask, hiển thị rõ ràng trạng thái giao dịch cho sinh viên.
+3. **Giao diện (Frontend Lead):** Xây dựng giao diện web tương tác tại `web/index.html` kết nối thư viện `ethers.js`, tích hợp ví MetaMask, hiển thị rõ ràng trạng thái giao dịch cho sinh viên.
 4. **Kiểm thử (Testing & QA Lead):** Thiết kế các ca kiểm thử biên (edge cases), ca kiểm thử gian lận kinh tế, chạy thử nghiệm trên Remix IDE / Hardhat và ghi nhận nhật ký `docs/AI_JOURNAL.md`.
 
 ---
