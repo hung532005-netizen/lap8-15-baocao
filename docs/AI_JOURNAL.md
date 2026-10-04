@@ -130,3 +130,67 @@ Sau khi học `TimeLockVault.sol`, nhóm mở `contracts/project/ProjectCore.sol
 
 ### 4. Ai phát hiện:
 **Sinh viên tự kiểm tra và sửa trong quá trình đối chiếu với bản mẫu TimeLockVault.**
+
+---
+
+## LAB 10 — RÀ SOÁT MÃ NGUỒN DO AI SINH RA (AUDIT VA SUA LOI)
+
+> **Ngày thực hiện:** 2026-10-04  
+> **Mục tiêu:** Rà soát `contracts/training/VaultBuggy.sol`, thực nghiệm khai thác ô nhớ `private` bằng `eth_getStorageAt`, audit và hoàn thiện `contracts/project/ProjectCore.sol`.
+
+---
+
+## Lần 5: Audit hợp đồng bài luyện VaultBuggy.sol
+
+### 1. Prompt:
+> *"Bạn là kiểm toán viên hợp đồng thông minh. Rà soát hợp đồng VaultBuggy dưới đây và liệt kê mọi lỗ hổng, xếp theo mức nghiêm trọng. Với mỗi lỗ hổng, nêu: dòng số mấy, khai thác thế nào, sửa ra sao."*
+
+### 2. AI trả về:
+AI chỉ ra 3 điểm:
+- Dòng 19: Toán tử so sánh `block.timestamp <= unlockTime` bị ngược so với logic khóa thời gian.
+- Dòng 20: Dùng `transfer()` có thể bị out-of-gas, thiếu sự kiện `event`.
+- Dòng 8: Biến `emergencyPin` là `private` nhưng có thể đọc được bằng RPC `eth_getStorageAt`.
+
+### 3. Đánh giá:
+**Dùng được, nhưng AI bỏ sót 1 lỗi nghiêm trọng về phân quyền.**
+
+### 4. Chỗ thiếu sót mà Sinh viên phát hiện:
+AI tập trung vào các lỗi cú pháp và kỹ thuật mà bỏ qua việc hàm `withdraw()` **hoàn toàn không có kiểm tra phân quyền `msg.sender == owner`**. Bất kỳ ai cũng có thể gọi `withdraw()` để rút sạch tiền của két về ví mình!
+
+### 5. Cách sửa:
+Bổ sung `if (msg.sender != owner) revert NotOwner();` và sửa toán tử `<=` thành `>=`.
+
+### 6. Ai phát hiện:
+**Sinh viên phát hiện lỗi phân quyền nghiêm trọng, AI phát hiện lỗi toán tử thời gian.**
+
+---
+
+## Lần 6: Audit và vá lỗi hợp đồng sản phẩm ProjectCore.sol
+
+### 1. Prompt:
+> *"Bạn là kiểm toán viên hợp đồng thông minh. Đọc SPEC.md và ProjectCore.sol dưới đây. Hãy tìm các lỗ hổng về phân quyền, thứ tự Checks-Effects-Interactions và các xung đột lợi ích kinh tế (game-theory). Với mỗi lỗ hổng, nêu: dòng số mấy, kịch bản khai thác và cách sửa."*
+
+### 2. AI trả về:
+AI nhận xét hợp đồng có cấu trúc tốt, nhưng chỉ ra thứ tự gọi `emit DisputeResolved` sau `_distributeFunds()` là chưa chuẩn CEI.
+
+### 3. Phản biện của Sinh viên (Lỗ hổng 4):
+Sinh viên phát hiện lỗ hổng kinh tế quan trọng: Trong `fund()`, chỉ chặn `msg.sender == seller`, nhưng **không chặn `msg.sender == arbiter`**, và trong `constructor` **không chặn `_seller == _arbiter`**. 
+Nếu trọng tài mua hàng hoặc người bán kiêm trọng tài, khi phát sinh tranh chấp thì trọng tài có thể tự phán quyết hoàn tiền cho chính mình (`resolveDispute(2)`) hoặc tự phán quyết trả tiền cho mình mà không khách quan.
+
+### 4. Cách khắc phục:
+- Bổ sung `error ArbiterCannotBeBuyer();` và `error ConflictOfInterest();`.
+- Chặn trong constructor: `if (_seller == _arbiter) revert ConflictOfInterest();`.
+- Chặn trong `fund()`: `if (msg.sender == arbiter) revert ArbiterCannotBeBuyer();`.
+- Đảo lệnh trong `resolveDispute`: phát `emit DisputeResolved(...)` trước khi gọi `_distributeFunds()`.
+
+---
+
+## BẢNG BẮT BUỘC TRONG AI_JOURNAL.md (LAB 10)
+
+| Lỗi | Mô tả | Ai phát hiện | Cách khắc phục |
+| :---: | :--- | :---: | :--- |
+| **1** | **Toán tử thời gian bị đảo ngược (`VaultBuggy.sol` - Dòng 19):** `block.timestamp <= unlockTime` cho phép rút khi còn khóa, nhưng hết hạn thì giam tiền vĩnh viễn. | **AI phát hiện** | Sửa thành `block.timestamp >= unlockTime`. |
+| **2** | **Thiếu kiểm tra phân quyền rút tiền (`VaultBuggy.sol` - Dòng 18-20):** Bất kỳ ví lạ nào cũng có thể gọi `withdraw()` rút sạch tiền két. | **Sinh viên phát hiện** | Bổ sung `if (msg.sender != owner) revert NotOwner();`. |
+| **3** | **Ngộ nhận biến `private` là an toàn (`VaultBuggy.sol` - Dòng 8):** `emergencyPin` lưu ở slot 2, đọc trực tiếp được bằng `eth_getStorageAt`. | **AI & Sinh viên chứng minh bằng thực nghiệm** | Không lưu bí mật trên blockchain; chỉ lưu hash `keccak256(pin + salt)`. |
+| **4** | **Xung đột lợi ích Trọng tài kiêm Người mua & Vi phạm CEI (`ProjectCore.sol`):** Trọng tài có thể tự mua hàng và tự xử thắng khi tranh chấp; `emit DisputeResolved` phát sau lệnh `call`. *(Được cộng điểm)* | **Sinh viên phát hiện** | Bổ sung kiểm tra `_seller != _arbiter`, `msg.sender != arbiter` trong `fund()`; đảo `emit` lên trước `_distributeFunds()`. |
+

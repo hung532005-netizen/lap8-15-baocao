@@ -34,6 +34,8 @@ contract ProjectCore {
     error NotArbiter();
     error NotParty();
     error SellerCannotBeBuyer();
+    error ArbiterCannotBeBuyer();
+    error ConflictOfInterest();
     error WrongAmount();
     error DeadlineNotReached();
     error DeadlinePassed();
@@ -50,7 +52,8 @@ contract ProjectCore {
         uint256 _inspectionDays
     ) {
         if (_seller == address(0) || _arbiter == address(0) || _feeRecipient == address(0)) revert WrongState();
-        if (_inspectionDays < 1) revert InvalidInspectionWindow(); // Toi thieu 1 ngay
+        if (_seller == _arbiter) revert ConflictOfInterest();
+        if (_inspectionDays < 1) revert InvalidInspectionWindow();
         if (_price == 0 || _price > MAX_TRANSACTION_LIMIT) revert PriceExceedsLimit();
 
         seller = _seller;
@@ -65,6 +68,7 @@ contract ProjectCore {
     function fund() external payable {
         if (state != State.Created) revert WrongState();
         if (msg.sender == seller) revert SellerCannotBeBuyer();
+        if (msg.sender == arbiter) revert ArbiterCannotBeBuyer();
         if (msg.value != price) revert WrongAmount();
 
         buyer = payable(msg.sender);
@@ -112,8 +116,8 @@ contract ProjectCore {
 
         if (decision == 1) {
             state = State.Completed;
-            _distributeFunds();
             emit DisputeResolved(arbiter, 1, balance);
+            _distributeFunds();
         } else if (decision == 2) {
             state = State.Refunded;
             emit Refunded(buyer, balance);
