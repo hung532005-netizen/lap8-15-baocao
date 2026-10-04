@@ -1,6 +1,7 @@
 @echo off
 chcp 65001 >nul
 echo Dang kiem tra va day thay doi len GitHub...
+git pull --rebase origin main
 git add .
 git commit -m "update: dong bo thay doi moi nhat len GitHub"
 git push origin main
