@@ -70,3 +70,4 @@ hce-escrow-k58/
    - `_price`: GiÃ¡ niÃªm yáº¿t (vÃ­ dá»¥ `100000000000000000` Wei = 0.1 ETH)
    - `_inspectionDays`: `3` (ngÃ y)
 [Check-in] Thành viên Nguy?n Van An (23K4300012) xác nh?n quy?n c?ng tác trên repo.
+[Check-in] Thành viên Tr?n Th? Mai (23K4300045) xác nh?n quy?n c?ng tác trên repo.
