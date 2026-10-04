@@ -1,4 +1,4 @@
-# KTX Escrow — Sàn Ký Quỹ Mua Bán Đồ Cũ Sinh Viên
+# KTX Trường bia  — Sàn Ký Quỹ Mua Bán Đồ Cũ Sinh Viên
 
 > **Môn học:** ECO2432 – Web3 Starter & Phân Tích Kinh Tế Số  
 > **Chủ đề Phần N:** Chủ đề 1 — Ký quỹ mua bán đồ cũ KTX  
