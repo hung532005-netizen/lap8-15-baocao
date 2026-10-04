@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KTX Escrow — Ký Quỹ Mua Bán Đồ Cũ Sinh Viên | ECO2432</title>
+  <meta name="description" content="DApp Ký quỹ hợp đồng thông minh cho sinh viên KTX mua bán đồ cũ an toàn, minh bạch">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: rgba(23, 32, 51, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at top right, #1e1b4b, #0b0f19 60%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 680px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #60a5fa;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #fff 30%, #93c5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+      margin-bottom: 20px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.92rem;
+    }
+    .row:last-child { border-bottom: none; }
+    .label { color: var(--text-muted); }
+    .value { font-weight: 600; font-family: monospace; }
+
+    .status-tag {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.82rem;
+    }
+    .status-created { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+    .status-funded { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+    .status-completed { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+    .status-refunded { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }
+    .status-disputed { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    button {
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    button:active { transform: scale(0.98); }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:hover:not(:disabled) { background: #059669; }
+
+    .btn-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .btn-danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.25); }
+
+    .btn-secondary { background: rgba(255, 255, 255, 0.08); color: var(--text); }
+    .btn-secondary:hover:not(:disabled) { background: rgba(255, 255, 255, 0.14); }
+
+    .full-width { grid-column: span 2; }
+
+    .log-box {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      font-size: 0.85rem;
+      color: #93c5fd;
+      min-height: 44px;
+      word-break: break-all;
+      display: flex;
+      align-items: center;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: auto;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="badge">ECO2432 · Nhóm Escrow K58</div>
+    <h1>KTX Escrow</h1>
+    <p class="subtitle">Sàn ký quỹ mua bán đồ dùng cũ nội trú minh bạch & bảo vệ quyền lợi sinh viên</p>
+  </header>
+
+  <div class="card">
+    <div class="row">
+      <span class="label">Ví kết nối:</span>
+      <span class="value" id="account">Chưa kết nối</span>
+    </div>
+    <div class="row">
+      <span class="label">Món hàng giao dịch:</span>
+      <span class="value">Bàn học gấp & Đèn học KTX</span>
+    </div>
+    <div class="row">
+      <span class="label">Giá niêm yết:</span>
+      <span class="value" id="priceDisplay">0.05 ETH (~120.000 VNĐ)</span>
+    </div>
+    <div class="row">
+      <span class="label">Trạng thái Smart Contract:</span>
+      <span id="stateDisplay" class="status-tag status-created">Created (Chờ nạp cọc)</span>
+    </div>
+    <div class="row">
+      <span class="label">Hạn tự động thanh toán:</span>
+      <span class="value" id="deadlineDisplay">3 ngày sau khi nạp</span>
+    </div>
+
+    <div class="actions">
+      <button id="btnConnect" class="btn-primary full-width">⚡ Kết nối Ví MetaMask</button>
+      <button id="btnFund" class="btn-primary" disabled>💰 Nạp Cọc (Người Mua)</button>
+      <button id="btnConfirm" class="btn-success" disabled>✅ Xác Nhận Nhận Hàng</button>
+      <button id="btnDispute" class="btn-danger" disabled>⚠️ Báo Khiếu Nại</button>
+      <button id="btnClaimDeadline" class="btn-secondary" disabled>⏳ Giải Ngân Quá Hạn</button>
+    </div>
+
+    <div id="logBox" class="log-box">Sẵn sàng kết nối ví để bắt đầu kiểm tra giao dịch...</div>
+  </div>
+
+  <footer>
+    <p>Dự án thực hành môn Web3 Starter (ECO2432) — Đại học Kinh tế Huế (HCE)</p>
+  </footer>
+</div>
+
+<script>
+  let provider, signer, userAddress;
+  const logBox = document.getElementById("logBox");
+  const accountNode = document.getElementById("account");
+  const stateNode = document.getElementById("stateDisplay");
+
+  const setLog = (msg) => { logBox.textContent = msg; };
+
+  document.getElementById("btnConnect").onclick = async () => {
+    if (!window.ethereum) {
+      alert("Vui lòng cài đặt ví MetaMask trên trình duyệt!");
+      return;
+    }
+    try {
+      provider = new ethers.BrowserProvider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = await provider.getSigner();
+      userAddress = await signer.getAddress();
+      accountNode.textContent = userAddress.slice(0, 6) + "..." + userAddress.slice(-4);
+      setLog("Đã kết nối ví thành công: " + userAddress);
+      document.getElementById("btnFund").disabled = false;
+      document.getElementById("btnConnect").textContent = "Đã Kết Nối";
+      document.getElementById("btnConnect").classList.replace("btn-primary", "btn-secondary");
+    } catch (err) {
+      setLog("Lỗi kết nối: " + (err.shortMessage || err.message));
+    }
+  };
+
+  // Giả lập tương tác luồng người dùng để kiểm chứng UI (Mock actions)
+  document.getElementById("btnFund").onclick = () => {
+    stateNode.className = "status-tag status-funded";
+    stateNode.textContent = "Funded (Đã khóa cọc)";
+    document.getElementById("btnFund").disabled = true;
+    document.getElementById("btnConfirm").disabled = false;
+    document.getElementById("btnDispute").disabled = false;
+    document.getElementById("btnClaimDeadline").disabled = false;
+    setLog("Người mua đã nạp cọc 0.05 ETH vào hợp đồng an toàn. Người bán có thể bàn giao đồ!");
+  };
+
+  document.getElementById("btnConfirm").onclick = () => {
+    stateNode.className = "status-tag status-completed";
+    stateNode.textContent = "Completed (Hoàn tất)";
+    document.getElementById("btnConfirm").disabled = true;
+    document.getElementById("btnDispute").disabled = true;
+    document.getElementById("btnClaimDeadline").disabled = true;
+    setLog("Người mua đã xác nhận nhận hàng! Hợp đồng trích 1% phí KTX và chuyển 99% cho Người bán.");
+  };
+
+  document.getElementById("btnDispute").onclick = () => {
+    stateNode.className = "status-tag status-disputed";
+    stateNode.textContent = "Disputed (Đang tranh chấp)";
+    document.getElementById("btnConfirm").disabled = true;
+    document.getElementById("btnClaimDeadline").disabled = true;
+    setLog("Đã mở khiếu nại! Hợp đồng tạm khóa tiền. Trọng tài Ban quản lý KTX sẽ can thiệp phân xử.");
+  };
+
+  document.getElementById("btnClaimDeadline").onclick = () => {
+    setLog("Kiểm tra thời hạn: Chưa hết 3 ngày kiểm tra hàng. Giao dịch revert với lỗi DeadlineNotReached()!");
+  };
+</script>
+</body>
+</html>
