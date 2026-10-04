@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Báo Cáo Tiến Trình Lab 08–10: KTX Trường Bia Escrow | ECO2432</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(17, 24, 39, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #3b82f6;
+      --primary-light: #60a5fa;
+      --accent: #8b5cf6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --glow: rgba(59, 130, 246, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(59, 130, 246, 0.12), transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(139, 92, 246, 0.12), transparent 40%);
+    }
+
+    /* Header Nav */
+    header {
+      padding: 1.25rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(9, 13, 22, 0.7);
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .repo-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      transition: all 0.2s ease;
+    }
+
+    .repo-link:hover {
+      color: white;
+      border-color: var(--primary);
+      background: rgba(59, 130, 246, 0.1);
+    }
+
+    /* Main Slide Container */
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 2.5rem;
+      position: relative;
+    }
+
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1100px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 3rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px var(--glow);
+      backdrop-filter: blur(16px);
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .slide.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.99);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .slide-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--primary-light);
+      margin-bottom: 0.75rem;
+    }
+
+    .slide-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #ffffff 40%, var(--primary-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.75rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+
+    .card-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .card-box:hover {
+      border-color: rgba(59, 130, 246, 0.4);
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateY(-2px);
+    }
+
+    .card-box h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #fff;
+    }
+
+    .card-box p, .card-box li {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .card-box ul {
+      list-style-position: inside;
+      margin-top: 0.5rem;
+    }
+
+    .card-box li {
+      margin-bottom: 0.4rem;
+    }
+
+    .badge-pill {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .badge-primary { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+    .badge-success { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+    .badge-warning { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+    .badge-danger  { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      color: #93c5fd;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Table styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    th {
+      color: #93c5fd;
+      font-weight: 700;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    td {
+      color: var(--text-muted);
+    }
+
+    /* Footer Controls */
+    footer {
+      padding: 1.25rem 2.5rem;
+      border-top: 1px solid var(--card-border);
+      background: rgba(9, 13, 22, 0.7);
+      backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .indicators {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .dot.active {
+      background: var(--primary);
+      width: 28px;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .slide-num {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .btn {
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      border: 1px solid var(--card-border);
+      padding: 0.55rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .quick-links {
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .file-chip {
+      color: #93c5fd;
+      font-size: 0.8rem;
+      text-decoration: none;
+      background: rgba(59, 130, 246, 0.08);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .file-chip:hover {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <span class="brand-badge">ECO2432</span>
+      <span>KTX Trường Bia Escrow</span>
+    </div>
+    <a href="https://github.com/hung532005-netizen/lap8-15-baocao" target="_blank" class="repo-link">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      github.com/lap8-15-baocao
+    </a>
+  </header>
+
+  <!-- Slide Canvas -->
+  <main>
+
+    <!-- SLIDE 1 -->
+    <section class="slide active" id="slide-1">
+      <div class="slide-tag">Lab 08 · Khởi động Đồ án</div>
+      <h2 class="slide-title">1. Giới thiệu Đề tài & Bối cảnh Nghiệp vụ</h2>
+      
+      <div class="grid-2">
+        <div class="card-box">
+          <h3>📌 Bài toán Thực tế tại KTX Trường Bia</h3>
+          <ul>
+            <li><strong>Sinh viên nội trú KTX:</strong> Nhu cầu mua bán, thanh lý giáo trình, quạt điện, bàn học, xe đạp rất cao.</li>
+            <li><strong>Rủi ro cố hữu:</strong> Người mua sợ chuyển khoản trước bị bùng hàng; Người bán sợ giao đồ trước bị giam tiền hoặc quỵt nợ.</li>
+            <li><strong>Mục tiêu:</strong> Thay thế niềm tin cảm tính bằng Smart Contract giữ hộ tiền độc lập trên mạng Sepolia.</li>
+          </ul>
+        </div>
+        <div class="card-box">
+          <h3>🚀 Giải pháp KTX Trường Bia Escrow</h3>
+          <ul>
+            <li><strong>Mô hình:</strong> Hợp đồng ký quỹ 3 bên (Người mua – Người bán – Trọng tài KTX).</li>
+            <li><strong>Quy ước bắt buộc:</strong> Tuân thủ 100% <code>AGENTS.md</code> (Solidity ^0.8.20, CEI, không dùng transfer, error có tên).</li>
+            <li><strong>Thực hiện độc lập:</strong> Lê Tiến Hùng (23K4300007) kiêm nhiệm 4 vai trò (Đặc tả, Hợp đồng, Giao diện, Kiểm thử).</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="quick-links">
+        <span style="color:var(--text-muted);font-size:0.8rem;align-self:center;">Tài liệu liên kết:</span>
+        <a href="../README.md" class="file-chip">📄 README.md</a>
+        <a href="PROJECT_PLAN.md" class="file-chip">📑 PROJECT_PLAN.md</a>
+        <a href="../AGENTS.md" class="file-chip">⚖️ AGENTS.md</a>
+      </div>
+    </section>
+
+    <!-- SLIDE 2 -->
+    <section class="slide" id="slide-2">
+      <div class="slide-tag">Lab 08 · Thiết kế Kinh tế & Đặc tả</div>
+      <h2 class="slide-title">2. Đặc tả 5 Quy tắc & Cơ chế Chống Gian lận</h2>
+
+      <div class="grid-2">
+        <div class="card-box">
+          <h3>📋 5 Quy tắc Nghiệp vụ (SPEC.md)</h3>
+          <ul>
+            <li><strong>R1 (Nạp tiền):</strong> Người mua nạp đúng 100% giá niêm yết <code>price</code>; chặn người bán tự mua đồ của mình.</li>
+            <li><strong>R2 (Giải ngân):</strong> Chỉ người mua mới có quyền bấm nhận đồ $\rightarrow$ chuyển 99% cho seller, 1% vào Quỹ KTX.</li>
+            <li><strong>R3 (Chống giam vốn):</strong> Sau 3 ngày kiểm tra, người bán có quyền gọi nhận tiền tự động nếu buyer im lặng.</li>
+            <li><strong>R4 (Khiếu nại):</strong> Đóng băng quỹ tức thì khi có hàng hỏng trước hạn.</li>
+            <li><strong>R5 (Trọng tài):</strong> Trọng tài KTX phân xử dứt điểm (thắng/thua).</li>
+          </ul>
+        </div>
+
+        <div class="card-box">
+          <h3>💡 Phản biện Sắc bén với AI</h3>
+          <p><strong>Lỗ hổng AI từng đề xuất:</strong> Tạo hàm <code>refundAfterDeadline()</code> tự động hoàn tiền cho buyer khi hết hạn.</p>
+          <div style="margin: 0.75rem 0; padding: 0.75rem; background: rgba(239, 68, 68, 0.1); border-left: 3px solid var(--danger); border-radius: 4px;">
+            <span class="badge-pill badge-danger" style="margin-bottom:4px;">Lỗ hổng kinh tế</span><br>
+            <span style="font-size:0.85rem;color:#fca5a5;">Người mua có thể nhận đồ nhưng cố tình im lặng để vừa lấy đồ vừa rút trọn tiền cọc!</span>
+          </div>
+          <p><strong>Sinh viên sửa đổi:</strong> Chuyển thành <code>claimPaymentAfterDeadline()</code> giải ngân cho người bán để cân bằng quyền lợi.</p>
+        </div>
+      </div>
+
+      <div class="quick-links">
+        <span style="color:var(--text-muted);font-size:0.8rem;align-self:center;">Tài liệu liên kết:</span>
+        <a href="SPEC.md" class="file-chip">📋 SPEC.md</a>
+        <a href="ECONOMIC_RULES.md" class="file-chip">💰 ECONOMIC_RULES.md</a>
+        <a href="AI_JOURNAL.md" class="file-chip">📓 AI_JOURNAL.md</a>
+      </div>
+    </section>
+
+    <!-- SLIDE 3 -->
+    <section class="slide" id="slide-3">
+      <div class="slide-tag">Lab 09 · Kỹ thuật Nền tảng</div>
+      <h2 class="slide-title">3. Bài học Két Khóa Thời gian (TimeLockVault)</h2>
+
+      <div class="grid-3" style="margin-bottom: 1.25rem;">
+        <div class="card-box">
+          <h3>🛡️ 1. Checks - Effects - Interactions</h3>
+          <p>Kiểm tra quyền & hạn khóa $\rightarrow$ Emit sự kiện $\rightarrow$ Gọi <code>call</code> chuyển tiền sau cùng để triệt tiêu Reentrancy.</p>
+        </div>
+        <div class="card-box">
+          <h3>⚡ 2. Custom Errors</h3>
+          <p>Dùng <code>revert NotOwner()</code> thay cho <code>require(..., "string")</code> giúp tối ưu phí gas triển khai và debug chính xác.</p>
+        </div>
+        <div class="card-box">
+          <h3>💸 3. Dùng .call thay transfer</h3>
+          <p>Hàm <code>call{value: ...}("")</code> không bị giới hạn cứng 2.300 gas stipend, hỗ trợ mượt mà các ví Smart Contract.</p>
+        </div>
+      </div>
+
+      <div class="card-box">
+        <h3>📊 Kết quả Đo Gas Thực tế trên Remix VM (Khóa 120s)</h3>
+        <table>
+          <thead>
+            <tr><th>Thao tác</th><th>Hàm gọi</th><th>Lượng Gas tiêu thụ</th><th>Trạng thái thực thi</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Deploy Két</td><td><code>constructor(120)</code></td><td>~200.000 gas</td><td><span class="badge-pill badge-success">Thành công</span></td></tr>
+            <tr><td>Nạp tiền vào két</td><td><code>deposit() (1 ETH)</code></td><td>~25.000 gas</td><td><span class="badge-pill badge-success">Thành công, emit Deposited</span></td></tr>
+            <tr><td>Rút tiền khi còn khóa</td><td><code>withdraw() (t &lt; 120s)</code></td><td>~22.000 gas</td><td><span class="badge-pill badge-danger">Bị từ chối: StillLocked</span></td></tr>
+            <tr><td>Rút tiền sau khi mở</td><td><code>withdraw() (t &ge; 120s)</code></td><td>~30.000 gas</td><td><span class="badge-pill badge-success">Thành công, nhận đủ 1 ETH</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="quick-links">
+        <span style="color:var(--text-muted);font-size:0.8rem;align-self:center;">Tài liệu liên kết:</span>
+        <a href="../contracts/training/TimeLockVault.sol" class="file-chip">📦 TimeLockVault.sol</a>
+        <a href="../contracts/training/SPEC.md" class="file-chip">📑 TimeLock SPEC.md</a>
+        <a href="../evidence/lab-09/README.md" class="file-chip">📸 Bằng chứng Gas Lab 09</a>
+      </div>
+    </section>
+
+    <!-- SLIDE 4 -->
+    <section class="slide" id="slide-4">
+      <div class="slide-tag">Lab 10 · Audit & Thực nghiệm</div>
+      <h2 class="slide-title">4. Rà soát Mã nguồn AI & Khai thác Ô nhớ EVM</h2>
+
+      <div class="grid-2">
+        <div class="card-box">
+          <h3>🔬 Thực nghiệm Đọc Ô nhớ private (Slot 0x2)</h3>
+          <p>Hợp đồng <code>VaultBuggy.sol</code> khai báo <code>uint256 private emergencyPin = 123456</code>.</p>
+          <div style="background: rgba(0,0,0,0.5); padding: 0.75rem; border-radius: 6px; margin: 0.5rem 0; font-family:'JetBrains Mono'; font-size:0.8rem;">
+            await window.ethereum.request({<br>
+            &nbsp;&nbsp;method: "eth_getStorageAt",<br>
+            &nbsp;&nbsp;params: [contract, "0x2", "latest"]<br>
+            });<br>
+            // Hex: 0x...01e240 &rarr; Dec: <strong>123456</strong>
+          </div>
+          <p style="font-size:0.85rem; color:#fca5a5;"><strong>Bài học:</strong> Từ khóa <code>private</code> không hề che giấu dữ liệu trên chuỗi. Toàn bộ dữ liệu on-chain đều công khai 100%.</p>
+        </div>
+
+        <div class="card-box">
+          <h3>🛡️ Nâng cấp & Vá lỗi cho ProjectCore.sol</h3>
+          <ul>
+            <li><strong>Lỗi 1 (CEI):</strong> Trong <code>resolveDispute(1)</code>, đảo lệnh <code>emit DisputeResolved</code> lên trước <code>_distributeFunds()</code> (trước lệnh gọi call chuyển tiền).</li>
+            <li><strong>Lỗi 2 (Xung đột lợi ích - Phản biện sinh viên):</strong>
+              Chặn người bán làm trọng tài (<code>_seller == _arbiter</code>) và chặn trọng tài tự mua đồ (<code>msg.sender == arbiter</code>) để triệt tiêu gian lận phán quyết.
+            </li>
+            <li><strong>Quy chuẩn:</strong> Hợp đồng đạt đúng <strong>146 dòng</strong> (&lt; 150 dòng theo quy định Sổ tay).</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="quick-links">
+        <span style="color:var(--text-muted);font-size:0.8rem;align-self:center;">Tài liệu liên kết:</span>
+        <a href="../contracts/training/VaultBuggy.sol" class="file-chip">⚠️ VaultBuggy.sol</a>
+        <a href="../contracts/project/ProjectCore.sol" class="file-chip">🛡️ ProjectCore.sol</a>
+        <a href="../evidence/lab-10/README.md" class="file-chip">🔎 Báo cáo Audit Lab 10</a>
+      </div>
+    </section>
+
+    <!-- SLIDE 5 -->
+    <section class="slide" id="slide-5">
+      <div class="slide-tag">Tổng kết & Định hướng</div>
+      <h2 class="slide-title">5. Sức khỏe Codebase & Lộ trình Tiếp theo</h2>
+
+      <div class="grid-2">
+        <div class="card-box">
+          <h3>✅ Sẵn sàng cho Gate Review 1 (Lab 12)</h3>
+          <ul>
+            <li><strong>Đặc tả & Kinh tế:</strong> Đầy đủ <code>SPEC.md</code> và <code>ECONOMIC_RULES.md</code>, xác định rõ phí 1%, trần 1 ETH, thời hạn 3 ngày.</li>
+            <li><strong>Smart Contract:</strong> <code>ProjectCore.sol</code> biên dịch sạch 0 lỗi với Solc 0.8.20+, tuân thủ CEI, Custom Errors.</li>
+            <li><strong>Nhật ký AI:</strong> Ghi rõ 4 lỗi đã phát hiện trong <code>AI_JOURNAL.md</code>, chỉ rõ phần AI làm và sinh viên phản biện.</li>
+            <li><strong>GitHub Repository:</strong> Đồng bộ 100% nhánh main kèm script <code>sync.bat</code> 1-click.</li>
+          </ul>
+        </div>
+
+        <div class="card-box">
+          <h3>🎯 Kế hoạch Triển khai Lab 11 – 15</h3>
+          <ul>
+            <li><strong>Lab 11:</strong> Cài đặt kiểm thử tự động cho quy tắc kinh tế (1 ca hợp lệ, 1 ca vi phạm bị revert).</li>
+            <li><strong>Lab 12:</strong> Thuyết trình Gate Review 1 trước lớp (bảo vệ phạm vi dự án).</li>
+            <li><strong>Lab 13:</strong> Tái hiện vụ hack The DAO 2016 (Reentrancy) trên <code>VulnerableBank</code> và vá lỗi.</li>
+            <li><strong>Lab 14:</strong> Tham gia rà soát chéo (audit chéo) hợp đồng của nhóm bạn.</li>
+            <li><strong>Lab 15:</strong> Hoàn thiện giao diện DApp Web3 và công khai trên GitHub Pages.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="quick-links">
+        <span style="color:var(--text-muted);font-size:0.8rem;align-self:center;">Tài liệu liên kết:</span>
+        <a href="../README.md" class="file-chip">🚀 README.md</a>
+        <a href="GATE_REVIEW_1.md" class="file-chip">🚪 docs/GATE_REVIEW_1.md</a>
+        <a href="../web/index.html" class="file-chip">🌐 web/index.html</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer Controls -->
+  <footer>
+    <div class="indicators">
+      <div class="dot active" onclick="goToSlide(0)"></div>
+      <div class="dot" onclick="goToSlide(1)"></div>
+      <div class="dot" onclick="goToSlide(2)"></div>
+      <div class="dot" onclick="goToSlide(3)"></div>
+      <div class="dot" onclick="goToSlide(4)"></div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="prevBtn" onclick="prevSlide()" disabled>← Trước</button>
+      <span class="slide-num" id="slideNum">1 / 5</span>
+      <button class="btn" id="nextBtn" onclick="nextSlide()">Tiếp →</button>
+    </div>
+  </footer>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.dot');
+    const slideNum = document.getElementById('slideNum');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    let currentIndex = 0;
+
+    function updateSlides() {
+      slides.forEach((slide, idx) => {
+        slide.classList.toggle('active', idx === currentIndex);
+      });
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === currentIndex);
+      });
+
+      slideNum.textContent = `${currentIndex + 1} / ${slides.length}`;
+      prevBtn.disabled = currentIndex === 0;
+      nextBtn.disabled = currentIndex === slides.length - 1;
+    }
+
+    function nextSlide() {
+      if (currentIndex < slides.length - 1) {
+        currentIndex++;
+        updateSlides();
+      }
+    }
+
+    function prevSlide() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateSlides();
+      }
+    }
+
+    function goToSlide(index) {
+      currentIndex = index;
+      updateSlides();
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        prevSlide();
+      }
+    });
+  </script>
+</body>
+</html>
