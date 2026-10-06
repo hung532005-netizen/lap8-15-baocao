@@ -82,7 +82,7 @@ hce-escrow-k58/
 | **Lab 9** | `contracts/training/TimeLockVault.sol` · `evidence/lab-09/` | Học kỹ thuật két khóa thời gian: Checks-Effects-Interactions, custom error, đo gas 4 thao tác trên Remix VM | ✅ **Hoàn thành** |
 | **Lab 10** | `contracts/project/ProjectCore.sol` · `evidence/lab-10/` · `docs/AI_JOURNAL.md` | Rà soát mã nguồn AI sinh ra: thực nghiệm đọc ô nhớ `private` bằng `eth_getStorageAt`, vá lỗi CEI và xung đột lợi ích trọng tài trong `ProjectCore` | ✅ **Hoàn thành** |
 | **Lab 11** | `contracts/project/ProjectCore.sol` · `docs/ECONOMIC_RULES.md` · `evidence/lab-11/` | Cài quy tắc kinh tế vào sản phẩm: phí nền tảng 1% (100 bps), trần giá giao dịch, kiểm thử 1 ca hợp lệ và 1 ca cố tình vi phạm | ✅ **Hoàn thành** |
-| **Lab 12** | `docs/GATE_REVIEW_1.md` · `docs/PROJECT_PLAN.md` | Gate Review 1 (Cổng duyệt bắt buộc): kiểm tra sức khỏe repo, demo 3 phút luồng cốt lõi và ca vi phạm bị chặn | 🔄 **Sắp triển khai** |
+| **Lab 12** | `docs/GATE_REVIEW_1.md` · `docs/PROJECT_PLAN.md` | Gate Review 1 (Cổng duyệt bắt buộc): kiểm tra sức khỏe repo, demo 3 phút luồng cốt lõi và ca vi phạm bị chặn | ✅ **Hoàn thành** |
 | **Lab 13** | `contracts/training/VulnerableBank.sol` · `evidence/lab-13/` · `docs/AI_JOURNAL.md` | Thực nghiệm vụ mất tiền do lỗi Reentrancy (vụ The DAO 2016), viết ca kiểm thử tấn công và vá lỗi cho `ProjectCore` | 🔄 **Sắp triển khai** |
 | **Lab 14** | `docs/AUDIT_REPORT.md` | Rà soát chéo giữa các nhóm theo danh mục kiểm tra 10 hạng mục bắt buộc | 🔄 **Sắp triển khai** |
 | **Lab 15** | `web/index.html` · `docs/PRESENTATION_PLAN.md` | Giao diện Web3 DApp kết nối MetaMask, đưa lên mạng công khai GitHub Pages và kịch bản demo bảo vệ đồ án | 🔄 **Sắp triển khai** |
