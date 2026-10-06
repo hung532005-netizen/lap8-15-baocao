@@ -50,16 +50,16 @@ Dự án do **1 thành viên độc lập thực hiện**, kiêm nhiệm toàn b
 
 ## 3. Mốc tiến độ bắt buộc (Milestones)
 
-| Mốc | Tên nhiệm vụ | Kết quả đầu ra bắt buộc | Trách nhiệm chính |
-| :---: | :--- | :--- | :---: |
-| **Lab 8** | Khởi tạo codebase nhóm & Quy tắc kinh tế | Repo nhóm chuẩn B.6, `PROJECT_PLAN.md`, `SPEC.md`, `ECONOMIC_RULES.md`, cam kết 1 câu | Toàn bộ nhóm |
-| **Lab 9** | Hợp đồng lõi biên dịch được | `contracts/project/ProjectCore.sol` biên dịch 0 lỗi trên Remix, đo gas thực tế | Hùng (Contract) |
-| **Lab 10** | Audit và sửa lỗi có bằng chứng | Kiểm tra Reentrancy, Checks-Effects-Interactions, log `AI_JOURNAL.md` | An (Testing) |
-| **Lab 11** | Quy tắc kinh tế chạy đúng | Test phí ký quỹ (1%), phạt bùng kèo, hoàn tiền sau hạn | Hùng (Contract) |
-| **Lab 12** | **Gate Review 1** | Báo cáo tiến độ giữa kỳ, demo tương tác hợp đồng trên Remix trước lớp | Toàn bộ nhóm |
-| **Lab 13** | Test ca tấn công & gian lận | Kịch bản tấn công: giam vốn, spam đơn, claim tiền sai vai trò | Hùng (Audit) |
-| **Lab 14** | Audit chéo (Peer-audit) | Biên bản đánh giá chéo mã nguồn và kinh tế của nhóm bạn | An (Contract) |
-| **Lab 15** | URL DApp công khai & Bảo vệ | Web DApp hoàn chỉnh chạy trên Vercel/GitHub Pages, slide thuyết trình | Mai (Frontend) |
+| Mốc | Tên nhiệm vụ | Kết quả đầu ra bắt buộc | Trách nhiệm chính | Trạng thái |
+| :---: | :--- | :--- | :---: | :---: |
+| **Lab 8** | Khởi tạo codebase nhóm & Quy tắc kinh tế | Repo nhóm chuẩn B.6, `PROJECT_PLAN.md`, `SPEC.md`, `ECONOMIC_RULES.md`, cam kết 1 câu | Toàn bộ nhóm | ✅ **Hoàn thành** |
+| **Lab 9** | Hợp đồng lõi biên dịch được | `contracts/project/ProjectCore.sol` biên dịch 0 lỗi trên Remix, đo gas thực tế | Hùng (Contract) | ✅ **Hoàn thành** |
+| **Lab 10** | Audit và sửa lỗi có bằng chứng | Kiểm tra Reentrancy, Checks-Effects-Interactions, log `AI_JOURNAL.md` | An (Testing) | ✅ **Hoàn thành** |
+| **Lab 11** | Quy tắc kinh tế chạy đúng | Test phí ký quỹ (1%), phạt bùng kèo, hoàn tiền sau hạn | Hùng (Contract) | ✅ **Hoàn thành** |
+| **Lab 12** | **Gate Review 1** | Báo cáo tiến độ giữa kỳ, demo tương tác hợp đồng trên Remix trước lớp | Toàn bộ nhóm | 🔄 **Sắp triển khai** |
+| **Lab 13** | Test ca tấn công & gian lận | Kịch bản tấn công: giam vốn, spam đơn, claim tiền sai vai trò | Hùng (Audit) | 🔄 **Sắp triển khai** |
+| **Lab 14** | Audit chéo (Peer-audit) | Biên bản đánh giá chéo mã nguồn và kinh tế của nhóm bạn | An (Contract) | 🔄 **Sắp triển khai** |
+| **Lab 15** | URL DApp công khai & Bảo vệ | Web DApp hoàn chỉnh chạy trên Vercel/GitHub Pages, slide thuyết trình | Mai (Frontend) | 🔄 **Sắp triển khai** |
 
 ---
 
