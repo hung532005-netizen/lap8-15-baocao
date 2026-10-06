@@ -194,3 +194,31 @@ Nếu trọng tài mua hàng hoặc người bán kiêm trọng tài, khi phát 
 | **3** | **Ngộ nhận biến `private` là an toàn (`VaultBuggy.sol` - Dòng 8):** `emergencyPin` lưu ở slot 2, đọc trực tiếp được bằng `eth_getStorageAt`. | **AI & Sinh viên chứng minh bằng thực nghiệm** | Không lưu bí mật trên blockchain; chỉ lưu hash `keccak256(pin + salt)`. |
 | **4** | **Xung đột lợi ích Trọng tài kiêm Người mua & Vi phạm CEI (`ProjectCore.sol`):** Trọng tài có thể tự mua hàng và tự xử thắng khi tranh chấp; `emit DisputeResolved` phát sau lệnh `call`. *(Được cộng điểm)* | **Sinh viên phát hiện** | Bổ sung kiểm tra `_seller != _arbiter`, `msg.sender != arbiter` trong `fund()`; đảo `emit` lên trước `_distributeFunds()`. |
 
+---
+
+# NHẬT KÝ LÀM VIỆC VỚI AI — LAB 11: CÀI QUY TẮC KINH TẾ VÀ KIỂM THỬ
+
+## Lần 7: Thiết kế cơ chế thu phí nền tảng 1% và Bẫy làm tròn số nguyên
+
+### 1. Prompt:
+> *"Hãy viết mã tính phí sàn 1% trong hàm giải ngân của ProjectCore.sol. Nếu phí bằng 1%, ta tính fee = amount * 1 / 100 có được không?"*
+
+### 2. AI trả về:
+AI gợi ý dùng phép chia `amount / 100` trực tiếp hoặc chia 100 mà không dùng hằng số basis points, đồng thời không kiểm tra chặn dưới số tiền giao dịch.
+
+### 3. Đánh giá:
+**Chưa đạt chuẩn kinh tế tài chính — Phải sửa.**
+
+### 4. Chỗ sai & Phản biện của Sinh viên:
+1. **Quy chuẩn tài chính (Basis points):** Trong tài chính và Web3, tỷ lệ phần trăm luôn biểu diễn bằng điểm cơ bản basis points ($1\% = 100\text{ bps}$, mẫu số $10.000$) để có độ mịn khi chia số nguyên, tránh sai số và dễ điều chỉnh sau này.
+2. **Bẫy làm tròn số nguyên về 0 (Rounding to Zero Trap):** Nếu người dùng nạp món hàng giá trị siêu nhỏ (ví dụ 50 wei), phép chia số nguyên `50 * 100 / 10000 = 0`, phí thu được bằng 0 wei! Sinh viên bổ sung chặn dưới `MIN_TRANSACTION_LIMIT = 10000 wei` với custom error `PriceBelowMinimum(attempted, minimum)` để triệt tiêu hoàn toàn bẫy này.
+3. **Minh bạch sự kiện on-chain:** Hàm phân phối quỹ phải phát riêng sự kiện `FeeCollected(address indexed recipient, uint256 amount)` để các hệ thống kế toán off-chain và subgraphs dễ dàng lập chỉ mục (index).
+
+### 5. Cách sửa:
+- Khai báo hằng số kinh tế: `PLATFORM_FEE_BPS = 100` và `BPS_DENOMINATOR = 10000`.
+- Kiểm tra `_price >= MIN_TRANSACTION_LIMIT` trong `constructor`.
+- Bổ sung phát sự kiện `emit FeeCollected(feeRecipient, fee)` và `emit Completed(seller, sellerPayout, fee)`.
+
+### 6. Ai phát hiện:
+**Sinh viên phát hiện bẫy làm tròn số nguyên và yêu cầu chuẩn hóa basis points theo quy chuẩn tài chính.**
+

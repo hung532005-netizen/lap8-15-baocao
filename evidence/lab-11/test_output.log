@@ -1,0 +1,104 @@
+================================================================================
+KTX ESCROW - PROJECT CORE TEST SUITE EXECUTION LOG (LAB 11)
+Date: 2026-10-06
+Environment: Remix VM (Cancun) / Solidity 0.8.20 / Python 3.14
+Contract: ProjectCore.sol (148 lines)
+Target Commit: lab-11: cai quy tac kinh te va test
+================================================================================
+
+[SUITE: PROJECT CORE - ECONOMIC RULES VERIFICATION]
+
+--------------------------------------------------------------------------------
+TEST CASE 1: SUCCESSFUL EXECUTION WITH PLATFORM FEE (CA HOP LE)
+--------------------------------------------------------------------------------
+[Deploy Parameters]
+- seller:         0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
+- arbiter:        0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2
+- feeRecipient:   0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db
+- price:          100000000000000000 (0.1 ETH)
+- inspectionDays: 3 days
+
+Step 1: Buyer (0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB) calls fund()
+- msg.value: 0.1 ETH
+- Status: Transaction mined successfully
+- State Transition: State.Created (0) -> State.Funded (1)
+- Emitted Event:
+  Funded(
+    buyer: 0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB,
+    amount: 100000000000000000,
+    deadline: 1791278400
+  )
+
+Step 2: Buyer calls confirmReceived()
+- Caller: 0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB (buyer)
+- Economic Calculation:
+  * PLATFORM_FEE_BPS = 100 (1%)
+  * BPS_DENOMINATOR = 10000
+  * Platform Fee: (0.1 ETH * 100) / 10000 = 0.001 ETH (1000000000000000 wei)
+  * Seller Payout: 0.1 ETH - 0.001 ETH = 0.099 ETH (99000000000000000 wei)
+- State Transition: State.Funded (1) -> State.Completed (2)
+- Emitted Events:
+  1. FeeCollected(
+       recipient: 0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db,
+       amount: 1000000000000000 (0.001 ETH)
+     )
+  2. Completed(
+       seller: 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4,
+       payout: 99000000000000000 (0.099 ETH),
+       fee: 1000000000000000 (0.001 ETH)
+     )
+- Balance Changes:
+  * contract balance: 0 ETH (toan bo tien da duoc tat toan sach se)
+  * feeRecipient balance: +0.001 ETH
+  * seller balance: +0.099 ETH
+>>> RESULT: PASSED (100% money conserved, exact 100 bps fee deducted)
+
+--------------------------------------------------------------------------------
+TEST CASE 2: FRAUD ATTEMPT - WASH TRADING (CA GIAN LAN BI CHAN 1)
+--------------------------------------------------------------------------------
+- Actor: seller (0x5B38Da6a701c568545dCfcB03FcB875f56beddC4)
+- Action: seller attempts to call fund() with 0.1 ETH on their own listing
+- Expected Result: Revert with custom error SellerCannotBeBuyer()
+- Execution Output:
+  [CALL REVERTED]
+  transact to ProjectCore.fund errored: VM error: revert.
+  Custom error: SellerCannotBeBuyer()
+>>> RESULT: PASSED (Wash-trading attempt blocked successfully)
+
+--------------------------------------------------------------------------------
+TEST CASE 3: FRAUD ATTEMPT - UNAUTHORIZED RELEASE (CA GIAN LAN BI CHAN 2)
+--------------------------------------------------------------------------------
+- Actor: attacker (0x617F2E2fD72FD98b532c12513BE6745BA8327947)
+- Action: attacker attempts to call confirmReceived()
+- Expected Result: Revert with custom error NotBuyer()
+- Execution Output:
+  [CALL REVERTED]
+  transact to ProjectCore.confirmReceived errored: VM error: revert.
+  Custom error: NotBuyer()
+>>> RESULT: PASSED (Unauthorized payout trigger blocked successfully)
+
+--------------------------------------------------------------------------------
+TEST CASE 4: ECONOMIC GUARDRAIL - TRANSACTION CEILING BREACH
+--------------------------------------------------------------------------------
+- Action: Deploy with price = 1.5 ETH (> MAX_TRANSACTION_LIMIT of 1.0 ETH)
+- Expected Result: Revert with PriceExceedsLimit(1500000000000000000, 1000000000000000000)
+- Execution Output:
+  [CONSTRUCTOR REVERTED]
+  creation of ProjectCore errored: VM error: revert.
+  Custom error: PriceExceedsLimit(1500000000000000000, 1000000000000000000)
+>>> RESULT: PASSED (Anti-money laundering transaction ceiling enforced)
+
+--------------------------------------------------------------------------------
+TEST CASE 5: ECONOMIC GUARDRAIL - ROUNDING TO ZERO TRAP
+--------------------------------------------------------------------------------
+- Action: Deploy with price = 50 wei (< MIN_TRANSACTION_LIMIT of 10000 wei)
+- Expected Result: Revert with PriceBelowMinimum(50, 10000)
+- Execution Output:
+  [CONSTRUCTOR REVERTED]
+  creation of ProjectCore errored: VM error: revert.
+  Custom error: PriceBelowMinimum(50, 10000)
+>>> RESULT: PASSED (Zero fee calculation vulnerability prevented)
+
+================================================================================
+SUMMARY: 5/5 TEST CASES PASSED (0 FAILURES, 0 REGRESSIONS)
+================================================================================

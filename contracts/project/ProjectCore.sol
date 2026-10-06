@@ -10,19 +10,20 @@ contract ProjectCore {
     // Hang so kinh te: Phi nen tang 1% = 100 basis points (1% = 100 / 10000)
     uint256 public constant PLATFORM_FEE_BPS = 100;
     uint256 public constant BPS_DENOMINATOR = 10000;
-    uint256 public constant MAX_TRANSACTION_LIMIT = 1 ether; // Gioi han chong rua tien
+    uint256 public constant MIN_TRANSACTION_LIMIT = 10000 wei; // Tranh bay phi lam tron ve 0
+    uint256 public constant MAX_TRANSACTION_LIMIT = 1 ether;     // Gioi han chong rua tien
 
     address payable public immutable seller;
     address payable public immutable arbiter;
     address payable public immutable feeRecipient;
     uint256 public immutable price;
     uint256 public immutable deadlineDuration;
-
     address payable public buyer;
     uint256 public deadline;
     State public state;
 
     event Funded(address indexed buyer, uint256 amount, uint256 deadline);
+    event FeeCollected(address indexed recipient, uint256 amount);
     event Completed(address indexed seller, uint256 payout, uint256 fee);
     event Refunded(address indexed buyer, uint256 amount);
     event Disputed(address indexed initiator);
@@ -40,7 +41,8 @@ contract ProjectCore {
     error DeadlineNotReached();
     error DeadlinePassed();
     error InvalidInspectionWindow();
-    error PriceExceedsLimit();
+    error PriceExceedsLimit(uint256 attempted, uint256 limit);
+    error PriceBelowMinimum(uint256 attempted, uint256 minimum);
     error InvalidDecision();
     error TransferFailed();
 
@@ -54,7 +56,8 @@ contract ProjectCore {
         if (_seller == address(0) || _arbiter == address(0) || _feeRecipient == address(0)) revert WrongState();
         if (_seller == _arbiter) revert ConflictOfInterest();
         if (_inspectionDays < 1) revert InvalidInspectionWindow();
-        if (_price == 0 || _price > MAX_TRANSACTION_LIMIT) revert PriceExceedsLimit();
+        if (_price < MIN_TRANSACTION_LIMIT) revert PriceBelowMinimum(_price, MIN_TRANSACTION_LIMIT);
+        if (_price > MAX_TRANSACTION_LIMIT) revert PriceExceedsLimit(_price, MAX_TRANSACTION_LIMIT);
 
         seller = _seller;
         arbiter = _arbiter;
@@ -74,7 +77,6 @@ contract ProjectCore {
         buyer = payable(msg.sender);
         deadline = block.timestamp + deadlineDuration;
         state = State.Funded;
-
         emit Funded(msg.sender, msg.value, deadline);
     }
 
@@ -106,14 +108,12 @@ contract ProjectCore {
         emit Disputed(msg.sender);
     }
 
-    /// @notice Trong tai dua ra phan quyet cuoi cung
-    /// @param decision 1: Chuyen tien cho seller; 2: Hoan tien cho buyer
+    /// @notice Trong tai dua ra phan quyet cuoi cung (1: Cho seller, 2: Hoan buyer)
     function resolveDispute(uint8 decision) external {
         if (state != State.Disputed) revert WrongState();
         if (msg.sender != arbiter) revert NotArbiter();
 
         uint256 balance = address(this).balance;
-
         if (decision == 1) {
             state = State.Completed;
             emit DisputeResolved(arbiter, 1, balance);
@@ -135,6 +135,7 @@ contract ProjectCore {
         uint256 fee = (total * PLATFORM_FEE_BPS) / BPS_DENOMINATOR;
         uint256 sellerPayout = total - fee;
 
+        emit FeeCollected(feeRecipient, fee);
         emit Completed(seller, sellerPayout, fee);
 
         (bool feeOk, ) = feeRecipient.call{value: fee}("");
