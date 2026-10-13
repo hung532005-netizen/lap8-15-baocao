@@ -65,3 +65,22 @@ Giao diện không hiển thị các thông báo lỗi kỹ thuật khó hiểu 
    - **Chế độ Interactive Sandbox:** Cho phép người dùng mở xem trên điện thoại hoặc máy tính khi chưa cài ví MetaMask vẫn có thể bấm thử toàn bộ các nút thao tác, xem mô phỏng phân phối dòng tiền và nhật ký sự kiện tức thì.
 3. **Bảng Điều Khiển Trọng Tài Tích Hợp (Arbiter Panel):**
    - Cung cấp hai nút phán quyết phân minh dành cho BQL KTX Trường Bia: Giải ngân cho Người bán (Quyết định 1) hoặc Hoàn trả toàn bộ cọc cho Người mua (Quyết định 2).
+
+---
+
+## 5. Danh Mục Liên Kết Nền Tảng Cụ Thể Tích Hợp Trên Web DApp
+
+Nhằm tối ưu trải nghiệm cho sinh viên và ban giám khảo, DApp tích hợp trực tiếp các liên kết nền tảng Web3 cụ thể thông qua thanh điều hướng và trung tâm liên kết nhanh (Quick Links Hub):
+
+| Nút / Liên kết trên Web | Địa chỉ URL liên kết cụ thể | Mục đích & Trải nghiệm người dùng |
+| :--- | :--- | :--- |
+| **🦊 Tải Ví MetaMask** | `https://metamask.io/download/` | Chuyển hướng người dùng tải extension chính thức trên Chrome/Edge/Brave. |
+| **📱 Mở trên MetaMask Mobile** | `https://metamask.app.link/dapp/hung532005-netizen.github.io/lap8-15-baocao/web/` | Deep Link tự động mở trang web bên trong trình duyệt DApp của ứng dụng MetaMask trên điện thoại. |
+| **🔍 Etherscan Contract** | `https://sepolia.etherscan.io/address/0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D` | Tra cứu mã nguồn đã xác thực, số dư và mọi sự kiện ký quỹ on-chain. |
+| **💧 Google Web3 Faucet** | `https://cloud.google.com/application/web3/faucet/ethereum/sepolia` | Hỗ trợ sinh viên nhận $0.05\text{ Sepolia ETH}$ miễn phí để thực hành nạp cọc. |
+| **⚡ Alchemy Sepolia Faucet** | `https://sepoliafaucet.com/` | Cổng cấp phát Sepolia ETH dự phòng. |
+| **📂 GitHub Repository** | `https://github.com/hung532005-netizen/lap8-15-baocao` | Toàn bộ mã nguồn, tài liệu và bằng chứng kiểm thử của đồ án. |
+| **📖 Đặc Tả SPEC.md** | `https://github.com/hung532005-netizen/lap8-15-baocao/blob/main/docs/SPEC.md` | Tài liệu đặc tả 5 quy tắc kinh tế và các trường hợp ngoại lệ. |
+| **🔗 Etherscan Transaction Links** | `https://sepolia.etherscan.io/tx/{TxHash}` | Tự động tạo link tra cứu trực tiếp trong Activity Log mỗi khi có giao dịch phát sinh. |
+| **🎓 Cổng Thông Tin HCE** | `https://hce.edu.vn` | Trang chủ Trường Đại học Kinh tế - Đại học Huế. |
+
