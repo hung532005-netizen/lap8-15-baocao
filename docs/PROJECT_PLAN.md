@@ -53,7 +53,7 @@ Dự án do **1 thành viên độc lập thực hiện**, kiêm nhiệm toàn b
 | **Lab 10** | Audit và sửa lỗi có bằng chứng | Kiểm tra Reentrancy, Checks-Effects-Interactions, log `AI_JOURNAL.md` | An (Testing) | ✅ **Hoàn thành** |
 | **Lab 11** | Quy tắc kinh tế chạy đúng | Test phí ký quỹ (1%), phạt bùng kèo, hoàn tiền sau hạn | Hùng (Contract) | ✅ **Hoàn thành** |
 | **Lab 12** | **Gate Review 1** | Báo cáo tiến độ giữa kỳ, demo tương tác hợp đồng trên Remix trước lớp | Toàn bộ nhóm | ✅ **Hoàn thành** |
-| **Lab 13** | Test ca tấn công & gian lận | Kịch bản tấn công: giam vốn, spam đơn, claim tiền sai vai trò | Hùng (Audit) | 🔄 **Sắp triển khai** |
+| **Lab 13** | Thực nghiệm vụ mất tiền & Vá lỗi (Reentrancy) | Mô phỏng rút cạn 7 ETH, vá bằng CEI & Guard, 12 negative tests ProjectCore | Hùng (Security) | ✅ **Hoàn thành** |
 | **Lab 14** | Audit chéo (Peer-audit) | Biên bản đánh giá chéo mã nguồn và kinh tế của nhóm bạn | An (Contract) | 🔄 **Sắp triển khai** |
 | **Lab 15** | URL DApp công khai & Bảo vệ | Web DApp hoàn chỉnh chạy trên Vercel/GitHub Pages, slide thuyết trình | Mai (Frontend) | 🔄 **Sắp triển khai** |
 

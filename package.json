@@ -3,7 +3,9 @@
   "private": true,
   "description": "ECO2432 starter kit. Optional: run npm install so local editors resolve OpenZeppelin imports; Remix IDE resolves them automatically.",
   "scripts": {
-    "test": "python evidence/lab-11/economic_model_verification.py"
+    "test": "python evidence/lab-11/economic_model_verification.py && python evidence/lab-13/reentrancy_simulation.py",
+    "test:lab11": "python evidence/lab-11/economic_model_verification.py",
+    "test:lab13": "python evidence/lab-13/reentrancy_simulation.py"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.0"

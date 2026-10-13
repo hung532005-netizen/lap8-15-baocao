@@ -1,0 +1,74 @@
+================================================================================
+THUC NGHIEM LAB 13: MO PHONG VU MAT TIEN DO LOI TAI NHAP (REENTRANCY)
+VA KIEM CHUNG PHUONG AN KHAC PHUC (CHECKS-EFFECTS-INTERACTIONS & GUARD)
+================================================================================
+
+--- BUOC 1: DUNG HIEN TRUONG (VULNERABLE BANK) ---
+-> 3 nguoi dung moi nguoi nap 2 ETH.
+-> Tong so du ngan hang ban dau (bankBalance): 6.00 ETH (6000000000000000000 wei)
+
+--- BUOC 2: KE TAN CONG TIEN HANH RUT CAN TIEN ---
+[Deposit] User_1 (Sinh vien A) nap 2.00 ETH
+[Deposit] User_2 (Sinh vien B) nap 2.00 ETH
+[Deposit] User_3 (Sinh vien C) nap 2.00 ETH
+[Deposit] Attacker nap 1.00 ETH
+[ATTACK] Attacker bat dau goi withdraw()...
+  -> Ngan hang kiem tra so du cua Attacker: 1.00 ETH (Hop le)
+  -> Ngan hang chuyen 1.00 ETH toi Attacker...
+    [REENTRANCY LAP 1] Attacker receive() tu dong goi lai withdraw()!
+  -> Ngan hang kiem tra so du cua Attacker: 1.00 ETH (Hop le)
+  -> Ngan hang chuyen 1.00 ETH toi Attacker...
+    [REENTRANCY LAP 2] Attacker receive() tu dong goi lai withdraw()!
+  -> Ngan hang kiem tra so du cua Attacker: 1.00 ETH (Hop le)
+  -> Ngan hang chuyen 1.00 ETH toi Attacker...
+    [REENTRANCY LAP 3] Attacker receive() tu dong goi lai withdraw()!
+  -> Ngan hang kiem tra so du cua Attacker: 1.00 ETH (Hop le)
+  -> Ngan hang chuyen 1.00 ETH toi Attacker...
+    [REENTRANCY LAP 4] Attacker receive() tu dong goi lai withdraw()!
+  -> Ngan hang kiem tra so du cua Attacker: 1.00 ETH (Hop le)
+  -> Ngan hang chuyen 1.00 ETH toi Attacker...
+    [REENTRANCY LAP 5] Attacker receive() tu dong goi lai withdraw()!
+  -> Ngan hang kiem tra so du cua Attacker: 1.00 ETH (Hop le)
+  -> Ngan hang chuyen 1.00 ETH toi Attacker...
+    [REENTRANCY LAP 6] Attacker receive() tu dong goi lai withdraw()!
+  -> Ngan hang kiem tra so du cua Attacker: 1.00 ETH (Hop le)
+  -> Ngan hang chuyen 1.00 ETH toi Attacker...
+  -> Ngan hang cap nhat so du Attacker ve 0
+  -> Ngan hang cap nhat so du Attacker ve 0
+  -> Ngan hang cap nhat so du Attacker ve 0
+  -> Ngan hang cap nhat so du Attacker ve 0
+  -> Ngan hang cap nhat so du Attacker ve 0
+  -> Ngan hang cap nhat so du Attacker ve 0
+  -> Ngan hang cap nhat so du Attacker ve 0
+
+[KET QUA SAU TAN CONG]
+- So du Ngan hang con lai: 0.00 ETH (0 wei)
+- So du Attacker chiem doat: 7.00 ETH (7000000000000000000 wei)
+- Von ban dau cua Attacker: 1.00 ETH | Lai rong chiem doat: 6.00 ETH
+-> HIEN TRUONG: NGAN HANG DA BI RUT CAN HOAN TOAN VE 0 ETH!
+
+--- BUOC 4: VA LOI VA CHUNG MINH TAN CONG THAT BAI ---
+[CACH 1: CHECKS-EFFECTS-INTERACTIONS (SafeBankCEI)]
+- Tong so du SafeBankCEI: 7.00 ETH
+  -> CEI: Cap nhat so du Attacker ve 0 truoc khi chuyen tien
+    -> [CHAN THANH CONG] Cu goi tai nhap bi tu choi: Revert: NoBalance() - So du bang 0
+- So du SafeBankCEI sau giao dich: 6.00 ETH (Con nguyen 6 ETH cua 3 user)
+-> KET LUAN CACH 1: CEI CHAN DUNG HOAN TOAN TAN CONG TAI NHAP!
+
+[CACH 2: OPENZEPPELIN REENTRANCYGUARD (SafeBankGuard)]
+    -> [CHAN THANH CONG] Khoa Guard tu choi: Revert: ReentrancyGuardReentrantCall() - Khoa reentrancy kich hoat
+- So du SafeBankGuard sau giao dich: 6.00 ETH
+-> KET LUAN CACH 2: REENTRANCYGUARD CHAN DUNG HOAN TOAN QUA KHOA MUTEX!
+
+--- BUOC 5: RA SOAT VA KIEM THU GIAN LAN TREN PROJECTCORE ---
+Kiem tra cac ca negative test tren ProjectCore:
+  1. Ca sai nguoi (NotArbiter / NotParty): Chi dinh dung vai tro, ke la bi chan -> DAT
+  2. Ca sai thoi diem (DeadlineNotReached / DeadlinePassed): Rut som hoac khieu nai muon bi chan -> DAT
+  3. Ca sai so tien (WrongAmount): Nap khong dung gia price niem yet bi chan -> DAT
+  4. Ca tan cong tai nhap: ProjectCore doi trang thai Completed/Refunded truoc khi chuyen tien
+     va su dung modifier nonReentrant -> BAT KHAT XAM PHAM (Reentrancy Proof).
+
+================================================================================
+HOAN THANH TOAN BO CAC BUOC THUC NGHIEM LAB 13
+================================================================================
+-> Da tao bieu do truc quan: D:\lap8-15 doan\evidence\lab-13\reentrancy_attack_chart.png

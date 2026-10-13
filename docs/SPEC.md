@@ -1,6 +1,6 @@
 # SPEC — KTX Trường Bia (Ký Quỹ Mua Bán Đồ Cũ Sinh Viên)
 
-> **Phiên bản:** v0.3 (Lab 11 — Cài quy tắc kinh tế và kiểm thử)  
+> **Phiên bản:** v0.4 (Lab 13 — Thực nghiệm vụ mất tiền và gia cố phòng thủ Reentrancy)  
 > **Áp dụng cho:** Sinh viên nội trú KTX Trường Bia và sinh viên trường Đại học Kinh tế - Đại học Huế (HCE)  
 > **Mã nguồn:** `contracts/project/ProjectCore.sol`
 
@@ -61,6 +61,7 @@ Hệ thống cung cấp cơ chế ký quỹ (escrow) tự động bằng Smart C
 - **E5 (Người mua chây ì không bấm xác nhận):** Người mua đã nhận đồ nhưng cố ý im lặng $\rightarrow$ Khi `block.timestamp >= deadline`, người bán gọi `claimPaymentAfterDeadline()` để nhận tiền tự động.
 - **E6 (Khiếu nại sau khi đã hết hạn):** Người mua chỉ khiếu nại sau khi mốc `deadline` đã trôi qua $\rightarrow$ Hệ thống từ chối nhận khiếu nại, báo lỗi `DeadlinePassed()`.
 - **E7 (Chuyển tiền thất bại):** Ví nhận là contract lỗi $\rightarrow$ Dùng `call{value: ...}("")` kiểm tra kết quả, revert `TransferFailed()`.
+- **E8 (Tấn công tái nhập Reentrancy):** Hợp đồng nhận tiền độc hại cố tình gọi lại hàm rút/giải ngân trong fallback/receive $\rightarrow$ Bị chặn đứng bởi nguyên tắc Checks-Effects-Interactions (trạng thái `State.Completed`/`Refunded` đã chốt) và modifier `nonReentrant` của OpenZeppelin v5.
 
 ---
 

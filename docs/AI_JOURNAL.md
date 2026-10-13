@@ -222,3 +222,53 @@ AI gợi ý dùng phép chia `amount / 100` trực tiếp hoặc chia 100 mà kh
 ### 6. Ai phát hiện:
 **Sinh viên phát hiện bẫy làm tròn số nguyên và yêu cầu chuẩn hóa basis points theo quy chuẩn tài chính.**
 
+---
+
+# NHẬT KÝ LÀM VIỆC VỚI AI — LAB 13: THỰC NGHIỆM MỘT VỤ MẤT TIỀN VÀ CÁCH KHẮC PHỤC
+
+> **Mục tiêu:** Thực nghiệm rút cạn tiền do lỗi tái nhập (Reentrancy) với `VulnerableBank.sol`, rà soát phòng thủ chiều sâu và bổ sung bộ negative tests cho `ProjectCore.sol`.
+
+## Lần 8: Đặt câu hỏi dẫn dắt phân tích lỗi tái nhập (Prompt I.4)
+
+### 1. Prompt (dán nguyên văn):
+> *"Bạn là kiểm toán viên hợp đồng thông minh. Đừng đưa mã sửa ngay. Hãy giải thích từng bước điều gì xảy ra khi hàm withdraw() dưới đây được gọi bởi một hợp đồng có hàm receive(). Sau đó nêu 2 cách khắc phục và so sánh ưu nhược điểm của từng cách.*
+> ```solidity
+> function withdraw() external {
+>     uint256 balance = balances[msg.sender];
+>     require(balance > 0, "Khong co so du");
+>     (bool ok, ) = msg.sender.call{value: balance}("");
+>     require(ok, "Chuyen that bai");
+>     balances[msg.sender] = 0;
+> }
+> ```
+> *"*"*
+
+### 2. AI trả về (tóm tắt):
+1. **Phân tích từng bước:**
+   - Bước 1: Kẻ tấn công gọi `withdraw()`. Ngân hàng kiểm tra `balance > 0` $\rightarrow$ Thỏa mãn.
+   - Bước 2: Ngân hàng gọi `msg.sender.call{value: balance}("")` để chuyển tiền.
+   - Bước 3: Hàm `receive()` của kẻ tấn công được kích hoạt tự động trước khi dòng `balances[msg.sender] = 0` được thực thi.
+   - Bước 4: Trong `receive()`, kẻ tấn công gọi lại `bank.withdraw()`. Do số dư trên sổ sách chưa được xóa, ngân hàng tiếp tục chi tiền. Chu kỳ lặp lại đệ quy rút cạn tiền.
+2. **2 cách khắc phục:**
+   - Cách 1: Đổi thứ tự theo mẫu Checks-Effects-Interactions (CEI).
+   - Cách 2: Kế thừa `ReentrancyGuard` của OpenZeppelin và gắn modifier `nonReentrant`.
+
+### 3. Đánh giá:
+**Dùng được — Giải thích đúng cơ chế và đưa ra đủ 2 cách vá.**
+
+### 4. Chỗ chưa sâu & Phản biện của Sinh viên:
+- **Quan điểm sai lầm phổ biến của AI:** AI thường đề xuất người dùng chỉ cần thêm modifier `nonReentrant` mà coi nhẹ việc sửa thứ tự dòng lệnh.
+- **Phản biện của Sinh viên:** Trong phỏng vấn và bảo mật thực tế, **thứ tự dòng lệnh (Checks-Effects-Interactions) mới là nguyên lý nền tảng triệt tiêu lỗ hổng**, không tốn gas mutex và không phụ thuộc thư viện ngoài. Thư viện `ReentrancyGuard` chỉ đóng vai trò phòng thủ chiều sâu (defense-in-depth). Sinh viên áp dụng cả hai cơ chế vào dự án.
+
+### 5. Cách sửa & Triển khai thực tế:
+1. Xây dựng hợp đồng [`contracts/training/SafeBank.sol`](../contracts/training/SafeBank.sol) chứng minh cả 2 cách vá.
+2. Rà soát [`contracts/project/ProjectCore.sol`](../contracts/project/ProjectCore.sol):
+   - Đảm bảo máy trạng thái cập nhật `State.Completed` và `State.Refunded` trước khi gọi `.call`.
+   - Kế thừa thêm `ReentrancyGuard` và bổ sung modifier `nonReentrant` cho `confirmReceived`, `claimPaymentAfterDeadline`, `resolveDispute`.
+   - Giữ độ dài hợp đồng đạt 149 dòng ($< 150$ dòng theo quy chuẩn).
+3. Bổ sung trọn bộ 12 ca kiểm thử (gồm các ca negative test sai người, sai thời điểm, sai số tiền, tái nhập) trong `test/ProjectCore.test.js` và `evidence/lab-13/reentrancy_simulation.py`.
+
+### 6. Ai phát hiện:
+**Sinh viên phân tích sâu bản chất dòng lệnh CEI và chỉ đạo mô hình phòng thủ chiều sâu (Defense-in-depth).**
+
+

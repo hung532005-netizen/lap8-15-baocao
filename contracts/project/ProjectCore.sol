@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
 /// @title KTX Truong Bia Escrow - Hop dong ky quy mua ban do cu sinh vien
 /// @notice Thuoc de tai 1 (Phan N) - Mon hoc ECO2432 Web3 Starter
-/// @dev Duoi 150 dong theo quy chuan, ap dung Checks-Effects-Interactions va custom errors.
-contract ProjectCore {
+/// @dev Duoi 150 dong theo quy chuan, ap dung CEI va ReentrancyGuard.
+contract ProjectCore is ReentrancyGuard {
     enum State { Created, Funded, Completed, Refunded, Disputed }
 
     // Hang so kinh te: Phi nen tang 1% = 100 basis points (1% = 100 / 10000)
@@ -45,7 +47,6 @@ contract ProjectCore {
     error PriceBelowMinimum(uint256 attempted, uint256 minimum);
     error InvalidDecision();
     error TransferFailed();
-
     constructor(
         address payable _seller,
         address payable _arbiter,
@@ -81,7 +82,7 @@ contract ProjectCore {
     }
 
     /// @notice Nguoi mua xac nhan da nhan do va hai long
-    function confirmReceived() external {
+    function confirmReceived() external nonReentrant {
         if (state != State.Funded) revert WrongState();
         if (msg.sender != buyer) revert NotBuyer();
 
@@ -90,7 +91,7 @@ contract ProjectCore {
     }
 
     /// @notice Qua han kiem tra ma nguoi mua khong xac nhan va khong khieu nai thi giai ngan cho nguoi ban
-    function claimPaymentAfterDeadline() external {
+    function claimPaymentAfterDeadline() external nonReentrant {
         if (state != State.Funded) revert WrongState();
         if (block.timestamp < deadline) revert DeadlineNotReached();
 
@@ -109,7 +110,7 @@ contract ProjectCore {
     }
 
     /// @notice Trong tai dua ra phan quyet cuoi cung (1: Cho seller, 2: Hoan buyer)
-    function resolveDispute(uint8 decision) external {
+    function resolveDispute(uint8 decision) external nonReentrant {
         if (state != State.Disputed) revert WrongState();
         if (msg.sender != arbiter) revert NotArbiter();
 

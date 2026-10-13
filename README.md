@@ -47,14 +47,19 @@ hce-escrow-k58/
 │   ├── AI_JOURNAL.md         # Nhật ký tương tác AI, lỗ hổng phát hiện và cách sửa
 │   └── PRESENTATION_PLAN.md  # Kịch bản demo sản phẩm
 ├── contracts/
-│   ├── training/             # Bài mẫu học kỹ thuật (TimeLockVault, ClassPoint...)
+│   ├── training/             # Bài mẫu học kỹ thuật (TimeLockVault, SafeBank...)
 │   └── project/
 │       └── ProjectCore.sol   # Hợp đồng ký quỹ lõi (<150 dòng, Checks-Effects-Interactions)
 ├── test/                     # Kịch bản kiểm thử luồng nghiệp vụ & gian lận
 ├── web/
 │   └── index.html            # Giao diện Web DApp tương tác ví MetaMask
 └── evidence/
-    └── lab-08/               # Ảnh chụp bằng chứng commit và kết quả chạy
+    ├── lab-08/               # Khởi tạo codebase nhóm và đặc tả v0.1
+    ├── lab-09/               # TimeLockVault và đo gas thực tế
+    ├── lab-10/               # Audit ProjectCore và kiểm chứng storage slot
+    ├── lab-11/               # Cài quy tắc kinh tế 100 bps và test vi phạm
+    ├── lab-12/               # Gate Review 1 và thu hẹp phạm vi
+    └── lab-13/               # Thực nghiệm rút cạn Reentrancy và hardening
 ```
 
 ---
@@ -83,7 +88,7 @@ hce-escrow-k58/
 | **Lab 10** | `contracts/project/ProjectCore.sol` · `evidence/lab-10/` · `docs/AI_JOURNAL.md` | Rà soát mã nguồn AI sinh ra: thực nghiệm đọc ô nhớ `private` bằng `eth_getStorageAt`, vá lỗi CEI và xung đột lợi ích trọng tài trong `ProjectCore` | ✅ **Hoàn thành** |
 | **Lab 11** | `contracts/project/ProjectCore.sol` · `docs/ECONOMIC_RULES.md` · `evidence/lab-11/` | Cài quy tắc kinh tế vào sản phẩm: phí nền tảng 1% (100 bps), trần giá giao dịch, kiểm thử 1 ca hợp lệ và 1 ca cố tình vi phạm | ✅ **Hoàn thành** |
 | **Lab 12** | `docs/GATE_REVIEW_1.md` · `docs/PROJECT_PLAN.md` | Gate Review 1 (Cổng duyệt bắt buộc): kiểm tra sức khỏe repo, demo 3 phút luồng cốt lõi và ca vi phạm bị chặn | ✅ **Hoàn thành** |
-| **Lab 13** | `contracts/training/VulnerableBank.sol` · `evidence/lab-13/` · `docs/AI_JOURNAL.md` | Thực nghiệm vụ mất tiền do lỗi Reentrancy (vụ The DAO 2016), viết ca kiểm thử tấn công và vá lỗi cho `ProjectCore` | 🔄 **Sắp triển khai** |
+| **Lab 13** | `contracts/training/VulnerableBank.sol` · `evidence/lab-13/` · `docs/AI_JOURNAL.md` | Thực nghiệm vụ mất tiền do lỗi Reentrancy (vụ The DAO 2016), viết ca kiểm thử tấn công và vá lỗi cho `ProjectCore` | ✅ **Hoàn thành** |
 | **Lab 14** | `docs/AUDIT_REPORT.md` | Rà soát chéo giữa các nhóm theo danh mục kiểm tra 10 hạng mục bắt buộc | 🔄 **Sắp triển khai** |
 | **Lab 15** | `web/index.html` · `docs/PRESENTATION_PLAN.md` | Giao diện Web3 DApp kết nối MetaMask, đưa lên mạng công khai GitHub Pages và kịch bản demo bảo vệ đồ án | 🔄 **Sắp triển khai** |
 
