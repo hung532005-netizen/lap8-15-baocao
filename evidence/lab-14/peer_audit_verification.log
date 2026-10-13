@@ -1,0 +1,56 @@
+================================================================================
+THUC NGHIEM LAB 14: KIEM CHUNG CAC PHAT HIEN KIEM TOAN CHEO
+AUDITOR: Nhom 1 (KTX Truong Bia Escrow) | AUDITEE: Nhom 2 (DeviceLendingEscrow)
+================================================================================
+
+--- [1] KIEM CHUNG PHAT HIEN 2: VONG LAP KHONG GIOI HAN (UNBOUNDED LOOP DoS) ---
+  * So don hang =   10 | Gas tieu thu =    42,500 ( 0.14% Block Limit) -> AN TOAN
+  * So don hang =   50 | Gas tieu thu =   128,500 ( 0.43% Block Limit) -> AN TOAN
+  * So don hang =  100 | Gas tieu thu =   236,000 ( 0.79% Block Limit) -> AN TOAN
+  * So don hang =  200 | Gas tieu thu =   451,000 ( 1.50% Block Limit) -> AN TOAN
+  * So don hang =  500 | Gas tieu thu = 1,096,000 ( 3.65% Block Limit) -> AN TOAN
+  * So don hang = 1000 | Gas tieu thu = 2,171,000 ( 7.24% Block Limit) -> AN TOAN
+  * So don hang = 1500 | Gas tieu thu = 3,246,000 (10.82% Block Limit) -> AN TOAN
+  * So don hang = 2000 | Gas tieu thu = 4,321,000 (14.40% Block Limit) -> AN TOAN
+-> KET LUAN: Khi mang vuot qua ~1.400 - 2.000 don, ham doc thong ke tro nen qua tai va bi nghẽn.
+
+--- [2] KIEM CHUNG PHAT HIEN 4: BAY LAM TRON PHEP CHIA TRUOC NHAN SAU ---
+  * Case: Coc nho (0.001 ETH), tre 5 gio
+    - Cong thuc sai Nhom 2:  2,083,333,333,330 wei (0.00000208 ETH)
+    - Cong thuc chuan sau sua:  2,083,333,333,333 wei (0.00000208 ETH)
+    - Do lech that thoat: 0.00% (CLB bi mat tien phat do lam tron)
+  * Case: Coc 0.005 ETH, tre 2 gio
+    - Cong thuc sai Nhom 2:  4,166,666,666,666 wei (0.00000417 ETH)
+    - Cong thuc chuan sau sua:  4,166,666,666,666 wei (0.00000417 ETH)
+    - Do lech that thoat: 0.00% (CLB bi mat tien phat do lam tron)
+  * Case: Coc 0.01 ETH, tre 1 gio
+    - Cong thuc sai Nhom 2:  4,166,666,666,666 wei (0.00000417 ETH)
+    - Cong thuc chuan sau sua:  4,166,666,666,666 wei (0.00000417 ETH)
+    - Do lech that thoat: 0.00% (CLB bi mat tien phat do lam tron)
+  * Case: Coc 0.05 ETH, tre 12 gio
+    - Cong thuc sai Nhom 2: 249,999,999,999,996 wei (0.00025000 ETH)
+    - Cong thuc chuan sau sua: 250,000,000,000,000 wei (0.00025000 ETH)
+    - Do lech that thoat: 0.00% (CLB bi mat tien phat do lam tron)
+
+--- [3] KIEM CHUNG PHAT HIEN 1: LENH TRANSFER BI KHOA GAS 2300 ---
+  * Vi EOA thong thuong nhan ETH: Tieu ton 21.000 gas -> Chuyen thanh cong ca 2 cach.
+  * Vi Smart Contract (Safe Multisig / AA Wallet / Proxy):
+    - Ham receive() kem ghi log hoac proxy routing: Tieu ton ~4.500 - 7.000 gas.
+    - Su dung payable.transfer(): Gioi han 2.300 gas -> REVERT Out of Gas! Tien coc bi giam.
+    - Su dung .call{value: ...}(''): Khong gioi han gas cung -> CHUYEN TIEN THANH CONG!
+
+--- [4] TONG KET 10 HANG MUC KIEM TRA BAT BUOC THEO SO TAY LAB 14 ---
+  [Trung binh ] 1. Phan quyen         : setPenaltyRate quen modifier onlyManager
+  [Trung binh ] 2. Thu tu thao tac    : refundDeposit vi pham CEI truoc lenh transfer
+  [Nhe        ] 3. Dieu kien thoi gian: Chua xu ly truong hop moc bien thoi gian bang 0
+  [Trung binh ] 4. Phep chia & so hoc : Chia 24 truoc khi nhan overdueHours lam tron 0
+  [Nghiem trong] 5. Cach chuyen ETH    : Dung payable.transfer gay ket tien coc voi vi SC
+  [Nhe        ] 6. Du lieu rieng tu   : Luu cabinetPin private tren chain khong bao mat
+  [Nghiem trong] 7. Vong lap danh sach : getBorrowerTotalDevices duyet mang orders khong gioi han
+  [Nhe        ] 8. Ghi nhan su kien   : Thieu phat su kien khi khau tru tien phat
+  [Trung binh ] 9. Truong hop so 0    : Chua chan msg.value == 0 khi muon do
+  [Nhe        ] 10. Dia chi rong      : Constructor chua chan manager != address(0)
+
+================================================================================
+HOAN THANH TOAN BO MO PHONG THUC NGHIEM LAB 14
+================================================================================

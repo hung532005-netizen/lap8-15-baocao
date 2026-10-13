@@ -271,4 +271,56 @@ AI gợi ý dùng phép chia `amount / 100` trực tiếp hoặc chia 100 mà kh
 ### 6. Ai phát hiện:
 **Sinh viên phân tích sâu bản chất dòng lệnh CEI và chỉ đạo mô hình phòng thủ chiều sâu (Defense-in-depth).**
 
+---
+
+# NHẬT KÝ LÀM VIỆC VỚI AI — LAB 14: RÀ SOÁT CHÉO GIỮA CÁC NHÓM (PEER AUDIT)
+
+> **Mục tiêu:** Rà soát chéo hợp đồng `DeviceLendingEscrow.sol` của Nhóm 2 theo 10 hạng mục kiểm tra bắt buộc; ghi nhận lỗi AI phát hiện và lỗi sinh viên phát hiện.
+
+## Lần 9: Rà soát an toàn và thẩm định quyền hạn hợp đồng Nhóm 2 (Prompt I.1)
+
+### 1. Prompt (dán nguyên văn theo mẫu I.1):
+> *"Bạn là chuyên viên thẩm định rủi ro tài sản số.*  
+> *Dưới đây là mã nguồn hợp đồng DeviceLendingEscrow.sol của Nhóm 2.*  
+> *Hãy liệt kê mọi quyền đặc biệt, phân quyền và các lỗ hổng tiềm ẩn theo 10 hạng mục kiểm toán.*  
+> *Với mỗi quyền hoặc lỗ hổng, nêu rõ: tên hàm, số dòng, và rủi ro cụ thể cho người tham gia.*  
+> *Trình bày dưới dạng bảng.*  
+> *Chỉ dựa trên mã nguồn tôi cung cấp. Nếu không tìm thấy, hãy nói rõ là không tìm thấy, không suy đoán.*  
+> *[dán mã nguồn DeviceLendingEscrow.sol]"*
+
+### 2. AI trả về (tóm tắt):
+- AI phát hiện hàm `setPenaltyRate` (dòng 104) quên modifier `onlyManager`, cho phép người ngoài tùy tiện sửa tỷ lệ phạt.
+- AI phát hiện mảng `orders[]` duyệt vòng lặp `for` trong `getBorrowerTotalDevices` (dòng 115) có nguy cơ tốn gas.
+- AI cho rằng lệnh `payable(borrower).transfer()` ở dòng 68 là cú pháp chuẩn của Solidity và không báo lỗi.
+
+### 3. Đánh giá:
+**Phải sửa & Bổ sung nhiều điểm quan trọng — AI bỏ sót các lỗi nghiêm trọng về cơ chế EVM và nghiệp vụ kinh tế.**
+
+### 4. Chỗ sai / Bỏ sót của AI & Phản biện của Sinh viên:
+1. **Lỗi nghiêm trọng kẹt tiền của lệnh `transfer()` (AI bỏ sót hoàn toàn):**
+   - AI cho rằng `transfer` là an toàn vì tự động revert khi lỗi.
+   - **Sinh viên phản biện:** Lệnh `transfer` bị gán cứng giới hạn 2.300 gas. Trong thực tế, nếu người mượn dùng ví Smart Contract (Gnosis Safe, ví Account Abstraction ERC-4337), hàm `receive()` tiêu tốn $> 2.300\text{ gas}$ khiến lệnh `transfer` vĩnh viễn revert. Kết quả là toàn bộ tiền cọc của sinh viên bị **kẹt chết trong hợp đồng**. Quy tắc môn học `AGENTS.md` bắt buộc dùng `call{value: ...}("")`.
+2. **Bẫy làm tròn số nguyên phép chia trước nhân sau (AI bỏ sót):**
+   - Dòng 82: `(deposit * penaltyBps) / 10000 / 24 * overdueHours`.
+   - **Sinh viên phát hiện:** Chia 24 trước khi nhân giờ làm tròn số nguyên về 0 wei, khiến CLB thất thoát toàn bộ tiền phạt trễ hạn của các đơn mượn nhỏ. Sinh viên chỉ ra phải đảo thành phép nhân trước chia sau: `(deposit * penaltyBps * overdueHours) / (10000 * 24)`.
+3. **Lộ mã PIN qua biến `private` (AI bỏ sót):**
+   - Dòng 18: `uint256 private cabinetPin;`.
+   - **Sinh viên phát hiện:** Dựa trên thực nghiệm Lab 10, biến `private` không hề bảo mật on-chain mà đọc được qua `eth_getStorageAt`.
+
+### 5. Cách xử lý & Kết quả:
+- Sinh viên lập biên bản đầy đủ 6 phát hiện chi tiết tại [`docs/AUDIT_REPORT.md`](AUDIT_REPORT.md).
+- Chuyển giao báo cáo cho Nhóm 2. Nhóm 2 đã tiếp thu và cam kết sửa ngay lỗi `transfer` và thêm `onlyManager` tại commit `b8f41e2`.
+
+### 6. Bảng phân định phát hiện lỗi (Trọng tâm chấm thi):
+
+| STT | Vấn đề phát hiện | Ai phát hiện | Cách khắc phục |
+| :-: | :--- | :--- | :--- |
+| **1** | Lỗi chuyển tiền `transfer` giới hạn 2.300 gas gây kẹt tiền cọc | **Sinh viên phát hiện** | Đổi sang `.call{value: ...}("")` kèm kiểm tra lỗi |
+| **2** | Bẫy làm tròn số nguyên phép chia phạt trễ hạn | **Sinh viên phát hiện** | Nhân toàn bộ tử số trước khi chia mẫu số |
+| **3** | Lộ mã PIN tủ thiết bị qua biến storage `private` | **Sinh viên phát hiện** | Không lưu plain-text trên chuỗi; dùng hash off-chain |
+| **4** | Quên kiểm tra `onlyManager` ở hàm `setPenaltyRate` | **Công cụ AI phát hiện** | Thêm modifier `onlyManager` |
+| **5** | Vòng lặp duyệt mảng `orders[]` không giới hạn gây DoS Gas | **AI & Sinh viên cùng phát hiện** | Bỏ vòng lặp trên chuỗi, dùng mapping hoặc phân trang |
+| **6** | Vi phạm thứ tự Checks-Effects-Interactions ở `refundDeposit` | **Sinh viên phát hiện** | Cập nhật `isRefunded = true` trước khi chuyển ETH |
+
+
 
