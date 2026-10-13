@@ -322,5 +322,47 @@ AI gợi ý dùng phép chia `amount / 100` trực tiếp hoặc chia 100 mà kh
 | **5** | Vòng lặp duyệt mảng `orders[]` không giới hạn gây DoS Gas | **AI & Sinh viên cùng phát hiện** | Bỏ vòng lặp trên chuỗi, dùng mapping hoặc phân trang |
 | **6** | Vi phạm thứ tự Checks-Effects-Interactions ở `refundDeposit` | **Sinh viên phát hiện** | Cập nhật `isRefunded = true` trước khi chuyển ETH |
 
+---
+
+# NHẬT KÝ LÀM VIỆC VỚI AI — LAB 15: GIAO DIỆN WEB VÀ ĐƯA SẢN PHẨM LÊN MẠNG
+
+> **Mục tiêu:** Xây dựng giao diện Web3 DApp kết nối MetaMask Sepolia và Smart Contract `ProjectCore.sol`; hoàn thiện kịch bản thuyết trình bảo vệ đồ án 5 phút.
+
+## Lần 10: Tinh chỉnh giao diện Web DApp mà không làm hỏng kết nối JavaScript (Prompt I.7)
+
+### 1. Prompt (dán nguyên văn theo mẫu I.7):
+> *"Giữ nguyên toàn bộ phần JavaScript trong tệp này.*  
+> *Chỉ chỉnh phần HTML và thêm CSS để:*  
+> *- Giao diện gọn gàng, dùng được trên màn hình điện thoại (Mobile-responsive).*  
+> *- Đổi tiêu đề thành 'KTX Trường Bia Escrow' với bài toán mua bán đồ cũ KTX.*  
+> *- Nút bấm có trạng thái đang xử lý (loading spinner / disabled).*  
+> *Không được đổi tên bất kỳ thuộc tính id nào, vì JavaScript đang dùng chúng.*  
+> *[dán mã nguồn web/index.html]"*
+
+### 2. AI trả về (tóm tắt):
+- AI thiết kế giao diện CSS theo phong cách Cyber Dark Mode với màu chủ đạo Indigo và Cyan.
+- Thêm hiệu ứng kính mờ (Glassmorphism), badge đổi màu động theo trạng thái của hợp đồng (`Created`, `Funded`, `Completed`, `Refunded`, `Disputed`).
+- Bổ sung cấu trúc hiển thị món hàng: Bàn học gấp gọn & Đèn LED chống cận phòng 304 Nhà B2 KTX Trường Bia.
+- Giữ nguyên các ID thẻ: `btnConnect`, `btnFund`, `btnConfirm`, `btnDispute`, `btnClaimDeadline`, `stateDisplay`, `account`.
+
+### 3. Đánh giá:
+**Dùng được — Giao diện đẹp, chuẩn thẩm mỹ Web3, responsive tốt trên di động.**
+
+### 4. Chỗ sai / Bổ sung cần thiết của Sinh viên:
+1. **Bẫy đổi tên ID thẻ (AI hay tự ý thay đổi):** AI từng gợi ý đổi `stateDisplay` thành `contractStatus`. Sinh viên kiên quyết giữ đúng ID quy chuẩn ban đầu để không làm gãy kết nối DOM và event listener.
+2. **Xử lý bẫy người dùng mở bằng file:// hoặc chưa có ví:** Nếu người dùng mở bằng điện thoại hoặc chưa cài MetaMask, giao diện dễ bị đơ nếu không có provider. Sinh viên chủ động bổ sung **Kiến trúc Kép (Dual-mode)**:
+   - Tự động phát hiện ví MetaMask để chạy chế độ Web3 Sepolia on-chain.
+   - Nếu chưa có ví, tự động bật **Interactive Sandbox Mode** cho phép người dùng click thử nghiệm toàn bộ luồng nghiệp vụ (Nạp cọc $\rightarrow$ Nhận hàng $\rightarrow$ Giải ngân 99% $\rightarrow$ Trích 1% Quỹ $\rightarrow$ Khiếu nại $\rightarrow$ Trọng tài phân xử).
+3. **Bảng điều khiển Trọng tài (Arbiter Panel):** Bổ sung cụm phán quyết nhị phân dành riêng cho BQL KTX Trường Bia (Quyết định 1 cho Seller thắng, Quyết định 2 hoàn trả Buyer).
+
+### 5. Kết quả đạt được:
+- File [`web/index.html`](../web/index.html) hoàn chỉnh, trực quan, chạy được 100% trên trình duyệt và di động.
+- Đường dẫn GitHub Pages hoạt động: `https://hung532005-netizen.github.io/lap8-15-baocao/web/`.
+- Kế hoạch thuyết trình 5 phút đạt chuẩn Phần C.4 tại [`docs/PRESENTATION_PLAN.md`](PRESENTATION_PLAN.md).
+
+### 6. Ai phát hiện:
+**Sinh viên chỉ đạo thiết kế kiến trúc Dual-mode (Web3 & Sandbox) và quản lý chặt chẽ ràng buộc ID thẻ DOM.**
+
+
 
 

@@ -3,276 +3,790 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>KTX Trường Bia — Ký Quỹ Mua Bán Đồ Cũ Sinh Viên | ECO2432</title>
-  <meta name="description" content="DApp Ký quỹ hợp đồng thông minh cho sinh viên KTX mua bán đồ cũ an toàn, minh bạch">
+  <title>KTX Trường Bia — Ký Quỹ Mua Bán Đồ Cũ Sinh Viên | Web3 Escrow DApp</title>
+  <meta name="description" content="DApp ký quỹ hợp đồng thông minh cho sinh viên KTX Trường Bia mua bán thanh lý đồ cũ an toàn, minh bạch on-chain">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
   <style>
     :root {
-      --bg: #0b0f19;
-      --card-bg: rgba(23, 32, 51, 0.75);
+      --bg: #090d16;
+      --card-bg: rgba(18, 25, 41, 0.85);
       --card-border: rgba(255, 255, 255, 0.08);
-      --primary: #3b82f6;
-      --primary-hover: #2563eb;
+      --card-border-hover: rgba(99, 102, 241, 0.3);
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-glow: rgba(79, 70, 229, 0.35);
+      --secondary: #06b6d4;
       --success: #10b981;
       --warning: #f59e0b;
       --danger: #ef4444;
+      --purple: #8b5cf6;
       --text: #f8fafc;
       --text-muted: #94a3b8;
+      --surface: rgba(255, 255, 255, 0.03);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-      background: radial-gradient(circle at top right, #1e1b4b, #0b0f19 60%);
+      background: radial-gradient(circle at 10% 20%, #17153b, #090d16 65%);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 30px 16px;
+      padding: 24px 16px;
+      line-height: 1.5;
     }
 
     .container {
       width: 100%;
-      max-width: 680px;
+      max-width: 820px;
     }
 
+    /* Header & Badges */
     header {
       text-align: center;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
+    }
+
+    .badge-wrapper {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
     }
 
     .badge {
-      display: inline-block;
-      padding: 4px 12px;
-      font-size: 0.78rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      font-size: 0.75rem;
       font-weight: 700;
-      color: #60a5fa;
-      background: rgba(59, 130, 246, 0.15);
-      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #818cf8;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
       border-radius: 9999px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 12px;
+      letter-spacing: 0.6px;
+    }
+
+    .badge-net {
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.12);
+      border-color: rgba(16, 185, 129, 0.3);
     }
 
     h1 {
-      font-size: 2rem;
+      font-size: 2.2rem;
       font-weight: 800;
-      letter-spacing: -0.5px;
-      background: linear-gradient(135deg, #fff 30%, #93c5fd);
+      letter-spacing: -0.8px;
+      background: linear-gradient(135deg, #ffffff 40%, #a5b4fc 80%, #38bdf8);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     p.subtitle {
       color: var(--text-muted);
       font-size: 0.95rem;
+      max-width: 620px;
+      margin: 0 auto;
     }
 
+    /* Cards */
     .card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      backdrop-filter: blur(16px);
-      border-radius: 18px;
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
       padding: 24px;
-      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
       margin-bottom: 20px;
+      transition: border-color 0.25s ease;
+    }
+    .card:hover {
+      border-color: var(--card-border-hover);
     }
 
-    .row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      font-size: 0.92rem;
-    }
-    .row:last-child { border-bottom: none; }
-    .label { color: var(--text-muted); }
-    .value { font-weight: 600; font-family: monospace; }
-
-    .status-tag {
-      padding: 4px 10px;
-      border-radius: 6px;
+    .card-title {
+      font-size: 1.05rem;
       font-weight: 700;
-      font-size: 0.82rem;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
-    .status-created { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
-    .status-funded { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
-    .status-completed { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
-    .status-refunded { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }
-    .status-disputed { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
 
-    .actions {
+    /* Product Item Showcase */
+    .item-banner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 18px;
+    }
+    .item-icon {
+      font-size: 2.2rem;
+      background: rgba(255, 255, 255, 0.05);
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+    }
+    .item-meta h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .item-meta p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* Data Grid */
+    .data-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
+    }
+    @media (max-width: 600px) {
+      .data-grid { grid-template-columns: 1fr; }
+    }
+
+    .data-cell {
+      background: var(--surface);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      padding: 10px 14px;
+    }
+    .data-cell .label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 3px;
+    }
+    .data-cell .value {
+      font-size: 0.92rem;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      color: #f1f5f9;
+      word-break: break-all;
+    }
+    .data-cell .value.highlight {
+      color: #38bdf8;
+    }
+
+    /* State Pills */
+    .status-tag {
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-created { background: rgba(59, 130, 246, 0.18); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .status-funded { background: rgba(245, 158, 11, 0.18); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .status-completed { background: rgba(16, 185, 129, 0.18); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .status-refunded { background: rgba(148, 163, 184, 0.18); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); }
+    .status-disputed { background: rgba(239, 68, 68, 0.18); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    /* Action Buttons */
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
       margin-top: 20px;
+    }
+    @media (max-width: 600px) {
+      .actions-grid { grid-template-columns: 1fr; }
     }
 
     button {
       font-family: inherit;
       font-weight: 600;
       font-size: 0.9rem;
-      padding: 12px 16px;
+      padding: 13px 18px;
       border-radius: 12px;
-      border: none;
+      border: 1px solid transparent;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
+      position: relative;
     }
-    button:active { transform: scale(0.98); }
-    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    button:active { transform: translateY(1px); }
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none !important;
+    }
 
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-connect {
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: #fff;
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+    .btn-connect:hover:not(:disabled) {
+      background: linear-gradient(135deg, #4338ca, #4f46e5);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5);
+    }
 
-    .btn-success { background: var(--success); color: #fff; }
-    .btn-success:hover:not(:disabled) { background: #059669; }
+    .btn-fund {
+      background: linear-gradient(135deg, #0284c7, #0ea5e9);
+      color: #fff;
+    }
+    .btn-fund:hover:not(:disabled) { background: #0369a1; }
 
-    .btn-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-    .btn-danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.25); }
+    .btn-confirm {
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: #fff;
+    }
+    .btn-confirm:hover:not(:disabled) { background: #047857; }
 
-    .btn-secondary { background: rgba(255, 255, 255, 0.08); color: var(--text); }
-    .btn-secondary:hover:not(:disabled) { background: rgba(255, 255, 255, 0.14); }
+    .btn-dispute {
+      background: rgba(239, 68, 68, 0.12);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+    .btn-dispute:hover:not(:disabled) {
+      background: rgba(239, 68, 68, 0.22);
+    }
 
-    .full-width { grid-column: span 2; }
+    .btn-claim {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    .btn-claim:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.12);
+    }
 
-    .log-box {
-      margin-top: 14px;
-      padding: 12px;
-      border-radius: 10px;
-      background: rgba(0, 0, 0, 0.3);
-      font-size: 0.85rem;
-      color: #93c5fd;
-      min-height: 44px;
-      word-break: break-all;
+    .full-row { grid-column: 1 / -1; }
+
+    /* Arbiter Section */
+    .arbiter-panel {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 14px;
+      background: rgba(139, 92, 246, 0.06);
+      border: 1px dashed rgba(139, 92, 246, 0.3);
+    }
+    .arbiter-panel h4 {
+      font-size: 0.88rem;
+      color: #c4b5fd;
+      margin-bottom: 10px;
       display: flex;
       align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity & Alert Boxes */
+    .log-box {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.86rem;
+      color: #cbd5e1;
+      font-family: 'JetBrains Mono', monospace;
+      line-height: 1.6;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+    .log-entry { margin-bottom: 6px; }
+    .log-entry:last-child { margin-bottom: 0; }
+    .log-time { color: var(--text-muted); font-size: 0.76rem; margin-right: 6px; }
+    .log-success { color: #34d399; }
+    .log-error { color: #f87171; }
+    .log-info { color: #60a5fa; }
+
+    /* Mode Switcher */
+    .mode-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding: 8px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 10px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+    .toggle-group {
+      display: flex;
+      gap: 6px;
+    }
+    .toggle-btn {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.76rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .toggle-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
     }
 
     footer {
       text-align: center;
       margin-top: auto;
+      padding-top: 24px;
       font-size: 0.82rem;
       color: var(--text-muted);
     }
+    footer a { color: #818cf8; text-decoration: none; }
   </style>
 </head>
 <body>
 
 <div class="container">
   <header>
-    <div class="badge">ECO2432 · KTX Trường Bia Escrow</div>
-    <h1>KTX Trường Bia</h1>
-    <p class="subtitle">Sàn ký quỹ mua bán đồ dùng cũ nội trú minh bạch & bảo vệ quyền lợi sinh viên KTX Trường Bia</p>
+    <div class="badge-wrapper">
+      <span class="badge">ECO2432 · Đồ Án Nhóm K58</span>
+      <span class="badge badge-net">Mạng Sepolia Testnet</span>
+    </div>
+    <h1>KTX Trường Bia Escrow</h1>
+    <p class="subtitle">Sàn ký quỹ hợp đồng thông minh cho sinh viên KTX mua bán đồ cũ minh bạch, loại bỏ hoàn toàn bùng cọc và lừa đảo.</p>
   </header>
 
+  <!-- Chế độ chạy: On-chain Web3 hoặc Sandbox mô phỏng -->
+  <div class="mode-bar">
+    <span id="envStatus">🌐 Chế độ: <strong style="color: #6ee7b7">Web3 Provider (Sepolia)</strong></span>
+    <div class="toggle-group">
+      <button id="btnModeWeb3" class="toggle-btn active" onclick="switchMode('web3')">MetaMask On-chain</button>
+      <button id="btnModeSim" class="toggle-btn" onclick="switchMode('sim')">Interactive Sandbox</button>
+    </div>
+  </div>
+
   <div class="card">
-    <div class="row">
-      <span class="label">Ví kết nối:</span>
-      <span class="value" id="account">Chưa kết nối</span>
-    </div>
-    <div class="row">
-      <span class="label">Món hàng giao dịch:</span>
-      <span class="value">Bàn học gấp & Đèn học KTX</span>
-    </div>
-    <div class="row">
-      <span class="label">Giá niêm yết:</span>
-      <span class="value" id="priceDisplay">0.05 ETH (~120.000 VNĐ)</span>
-    </div>
-    <div class="row">
-      <span class="label">Trạng thái Smart Contract:</span>
-      <span id="stateDisplay" class="status-tag status-created">Created (Chờ nạp cọc)</span>
-    </div>
-    <div class="row">
-      <span class="label">Hạn tự động thanh toán:</span>
-      <span class="value" id="deadlineDisplay">3 ngày sau khi nạp</span>
+    <div class="card-title">
+      <span>📦 Chi Tiết Đơn Hàng Mua Bán</span>
+      <span id="stateBadge" class="status-tag status-created">Created (Chờ nạp cọc)</span>
     </div>
 
-    <div class="actions">
-      <button id="btnConnect" class="btn-primary full-width">⚡ Kết nối Ví MetaMask</button>
-      <button id="btnFund" class="btn-primary" disabled>💰 Nạp Cọc (Người Mua)</button>
-      <button id="btnConfirm" class="btn-success" disabled>✅ Xác Nhận Nhận Hàng</button>
-      <button id="btnDispute" class="btn-danger" disabled>⚠️ Báo Khiếu Nại</button>
-      <button id="btnClaimDeadline" class="btn-secondary" disabled>⏳ Giải Ngân Quá Hạn</button>
+    <!-- Món hàng cụ thể của sinh viên KTX -->
+    <div class="item-banner">
+      <div class="item-icon">🪑</div>
+      <div class="item-meta">
+        <h3>Bàn Học Gấp Gọn & Đèn Học Sinh Viên KTX</h3>
+        <p>Bàn gỗ gấp + Đèn LED chống cận phòng 304 Nhà B2 KTX Trường Bia</p>
+      </div>
     </div>
 
-    <div id="logBox" class="log-box">Sẵn sàng kết nối ví để bắt đầu kiểm tra giao dịch...</div>
+    <div class="data-grid">
+      <div class="data-cell">
+        <span class="label">Giá niêm yết (Price)</span>
+        <span class="value highlight" id="priceDisplay">0.05 ETH (~125.000 VNĐ)</span>
+      </div>
+      <div class="data-cell">
+        <span class="label">Phí sàn KTX (1% = 100 bps)</span>
+        <span class="value" id="feeDisplay">0.0005 ETH (Quỹ hoạt động KTX)</span>
+      </div>
+      <div class="data-cell">
+        <span class="label">Người Bán (Seller)</span>
+        <span class="value" id="sellerDisplay">0x9A2...B14E (Phòng 304 Nhà B2)</span>
+      </div>
+      <div class="data-cell">
+        <span class="label">Người Mua (Buyer)</span>
+        <span class="value" id="buyerDisplay">Chưa có (Chờ nạp cọc)</span>
+      </div>
+      <div class="data-cell">
+        <span class="label">Trọng Tài KTX (Arbiter)</span>
+        <span class="value" id="arbiterDisplay">0x4D1...79A2 (BQL KTX Trường Bia)</span>
+      </div>
+      <div class="data-cell">
+        <span class="label">Thời hạn kiểm tra (Deadline)</span>
+        <span class="value" id="deadlineDisplay">3 ngày sau khi nạp</span>
+      </div>
+      <div class="data-cell full-row">
+        <span class="label">Địa chỉ Smart Contract (`ProjectCore.sol`)</span>
+        <span class="value" style="font-size: 0.8rem; color: #a5b4fc" id="contractAddressDisplay">0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D</span>
+      </div>
+      <div class="data-cell full-row">
+        <span class="label">Ví của bạn đang kết nối</span>
+        <span class="value" id="walletDisplay" style="color: #cbd5e1">Chưa kết nối ví</span>
+      </div>
+    </div>
+
+    <!-- Các hành động chính -->
+    <div class="actions-grid">
+      <button id="btnConnect" class="btn-connect full-row" onclick="handleConnect()">
+        ⚡ Kết Nối Ví MetaMask (Sepolia)
+      </button>
+
+      <button id="btnFund" class="btn-fund" onclick="handleFund()" disabled>
+        💰 1. Nạp Cọc 0.05 ETH (Người Mua)
+      </button>
+
+      <button id="btnConfirm" class="btn-confirm" onclick="handleConfirm()" disabled>
+        ✅ 2. Nhận Hàng & Giải Ngân
+      </button>
+
+      <button id="btnClaimDeadline" class="btn-claim" onclick="handleClaimDeadline()" disabled>
+        ⏳ 3. Người Bán Rút Tiền Quá Hạn
+      </button>
+
+      <button id="btnDispute" class="btn-dispute" onclick="handleDispute()" disabled>
+        ⚠️ 4. Mở Khiếu Nại (Báo Hàng Hỏng)
+      </button>
+    </div>
+
+    <!-- Bảng điều khiển dành riêng cho Trọng tài Ban quản lý KTX -->
+    <div class="arbiter-panel">
+      <h4>⚖️ Bảng Điều Khiển Trọng Tài (Ban Quản Lý KTX Trường Bia)</h4>
+      <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px;">
+        Chỉ ví Trọng tài mới được kích hoạt khi hợp đồng ở trạng thái <code>Disputed</code>.
+      </p>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button id="btnArbiterSeller" class="btn-confirm" style="flex: 1;" onclick="handleResolve(1)" disabled>
+          🏆 Phán Quyết: Người Bán Thắng (99% Seller, 1% Quỹ)
+        </button>
+        <button id="btnArbiterBuyer" class="btn-dispute" style="flex: 1;" onclick="handleResolve(2)" disabled>
+          🔄 Phán Quyết: Hoàn 100% Cọc Cho Người Mua
+        </button>
+      </div>
+    </div>
+
+    <!-- Nhật ký giao dịch on-chain -->
+    <div class="card-title" style="margin-top: 20px; font-size: 0.95rem;">
+      <span>📋 Nhật Ký Hoạt Động & Giao Dịch</span>
+      <span style="font-size: 0.78rem; font-weight: normal; color: var(--text-muted)">Live Event Stream</span>
+    </div>
+    <div id="logBox" class="log-box">
+      <div class="log-entry log-info"><span class="log-time">[00:00:00]</span> Sẵn sàng kết nối ví hoặc chạy thử nghiệm chế độ Interactive Sandbox.</div>
+    </div>
   </div>
 
   <footer>
-    <p>Dự án thực hành môn Web3 Starter (ECO2432) — Đại học Kinh tế Huế (HCE)</p>
+    <p>Đồ án thực hành ECO2432 — Hệ thống Ký quỹ KTX Trường Bia K58 · <a href="../docs/SPEC.md" target="_blank">Xem Đặc tả SPEC.md</a></p>
   </footer>
 </div>
 
 <script>
+  // =========================================================================
+  // BẢNG ÁNH XẠ HỢP ĐỒNG ON-CHAIN (STEP 1: SỔ TAY LAB 15)
+  // =========================================================================
+  const CONTRACT_ADDRESS = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
+  const SEPOLIA_CHAIN_ID = "0xaa36a7"; // 11155111
+
+  // ABI đầy đủ của ProjectCore.sol (Lab 11 - 13)
+  const CONTRACT_ABI = [
+    "function PLATFORM_FEE_BPS() view returns (uint256)",
+    "function BPS_DENOMINATOR() view returns (uint256)",
+    "function MIN_TRANSACTION_LIMIT() view returns (uint256)",
+    "function MAX_TRANSACTION_LIMIT() view returns (uint256)",
+    "function seller() view returns (address)",
+    "function arbiter() view returns (address)",
+    "function feeRecipient() view returns (address)",
+    "function buyer() view returns (address)",
+    "function price() view returns (uint256)",
+    "function deadline() view returns (uint256)",
+    "function state() view returns (uint8)",
+    "function fund() external payable",
+    "function confirmReceived() external",
+    "function claimPaymentAfterDeadline() external",
+    "function raiseDispute() external",
+    "function resolveDispute(uint8 decision) external",
+    "event Funded(address indexed buyer, uint256 amount, uint256 deadline)",
+    "event FeeCollected(address indexed recipient, uint256 amount)",
+    "event Completed(address indexed seller, uint256 payout, uint256 fee)",
+    "event Refunded(address indexed buyer, uint256 amount)",
+    "event Disputed(address indexed initiator)",
+    "event DisputeResolved(address indexed arbiter, uint8 decision, uint256 amount)"
+  ];
+
+  // Trạng thái cục bộ
+  let currentMode = "web3"; // 'web3' hoac 'sim'
   let provider, signer, userAddress;
-  const logBox = document.getElementById("logBox");
-  const accountNode = document.getElementById("account");
-  const stateNode = document.getElementById("stateDisplay");
+  let contractInstance = null;
 
-  const setLog = (msg) => { logBox.textContent = msg; };
+  // Trạng thái mô phỏng Sandbox (Dành cho trình chiếu hoặc khi không có ví)
+  let simState = {
+    stateIndex: 0, // 0: Created, 1: Funded, 2: Completed, 3: Refunded, 4: Disputed
+    seller: "0x9A2f3e827A9B1D56F62bB27357876805d214B14E",
+    buyer: null,
+    arbiter: "0x4D1aB68205C94a86F0763C5389E54964179A79A2",
+    price: ethers.parseEther("0.05"),
+    deadline: 0
+  };
 
-  document.getElementById("btnConnect").onclick = async () => {
+  const STATE_LABELS = [
+    { text: "Created (Chờ nạp cọc)", class: "status-created" },
+    { text: "Funded (Đã khóa cọc)", class: "status-funded" },
+    { text: "Completed (Hoàn tất)", class: "status-completed" },
+    { text: "Refunded (Đã hoàn tiền)", class: "status-refunded" },
+    { text: "Disputed (Đang tranh chấp)", class: "status-disputed" }
+  ];
+
+  function addLog(msg, type = "info") {
+    const box = document.getElementById("logBox");
+    const d = new Date();
+    const timeStr = `[${d.toTimeString().split(" ")[0]}]`;
+    const div = document.createElement("div");
+    div.className = `log-entry log-${type}`;
+    div.innerHTML = `<span class="log-time">${timeStr}</span> ${msg}`;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function updateUIState(stateIndex) {
+    const badge = document.getElementById("stateBadge");
+    const info = STATE_LABELS[stateIndex] || STATE_LABELS[0];
+    badge.className = `status-tag ${info.class}`;
+    badge.textContent = info.text;
+
+    // Quản lý trạng thái nút
+    const isFunded = (stateIndex === 1);
+    const isDisputed = (stateIndex === 4);
+
+    document.getElementById("btnFund").disabled = (stateIndex !== 0) || !userAddress;
+    document.getElementById("btnConfirm").disabled = !isFunded || !userAddress;
+    document.getElementById("btnDispute").disabled = !isFunded || !userAddress;
+    document.getElementById("btnClaimDeadline").disabled = !isFunded || !userAddress;
+    document.getElementById("btnArbiterSeller").disabled = !isDisputed;
+    document.getElementById("btnArbiterBuyer").disabled = !isDisputed;
+  }
+
+  function switchMode(mode) {
+    currentMode = mode;
+    document.getElementById("btnModeWeb3").classList.toggle("active", mode === "web3");
+    document.getElementById("btnModeSim").classList.toggle("active", mode === "sim");
+
+    if (mode === "sim") {
+      document.getElementById("envStatus").innerHTML = "🎮 Chế độ: <strong style='color: #38bdf8'>Interactive Sandbox (Mô phỏng tức thì)</strong>";
+      if (!userAddress) {
+        userAddress = "0x71C...DemoBuyer";
+        document.getElementById("walletDisplay").textContent = userAddress + " (Ví thử nghiệm)";
+      }
+      addLog("Đã bật chế độ Sandbox. Bạn có thể nhấn tất cả các nút để thử nghiệm luồng nghiệp vụ!", "info");
+      updateUIState(simState.stateIndex);
+    } else {
+      document.getElementById("envStatus").innerHTML = "🌐 Chế độ: <strong style='color: #6ee7b7'>Web3 Provider (Sepolia)</strong>";
+      addLog("Đã chuyển về chế độ Web3. Hãy kết nối ví MetaMask Sepolia.", "info");
+    }
+  }
+
+  // =========================================================================
+  // KẾT NỐI VÍ METAMASK (STEP 1 & BẪY THƯỜNG GẶP)
+  // =========================================================================
+  async function handleConnect() {
     if (!window.ethereum) {
-      alert("Vui lòng cài đặt ví MetaMask trên trình duyệt!");
+      addLog("Không tìm thấy MetaMask! Tự động chuyển sang chế độ Sandbox mô phỏng.", "error");
+      switchMode("sim");
       return;
     }
     try {
+      addLog("Đang yêu cầu kết nối ví MetaMask...", "info");
       provider = new ethers.BrowserProvider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
+      
+      // Kiểm tra Chain ID Sepolia
+      const network = await provider.getNetwork();
+      if (network.chainId !== 11155111n) {
+        addLog("Cảnh báo: Ví chưa ở mạng Sepolia! Đang yêu cầu chuyển mạng...", "error");
+        try {
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: SEPOLIA_CHAIN_ID }]
+          });
+        } catch (switchError) {
+          addLog("Vui lòng tự chuyển sang mạng Sepolia trong MetaMask để tiếp tục.", "error");
+        }
+      }
+
+      const accounts = await provider.send("eth_requestAccounts", []);
       signer = await provider.getSigner();
       userAddress = await signer.getAddress();
-      accountNode.textContent = userAddress.slice(0, 6) + "..." + userAddress.slice(-4);
-      setLog("Đã kết nối ví thành công: " + userAddress);
-      document.getElementById("btnFund").disabled = false;
-      document.getElementById("btnConnect").textContent = "Đã Kết Nối";
-      document.getElementById("btnConnect").classList.replace("btn-primary", "btn-secondary");
+
+      document.getElementById("walletDisplay").textContent = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)} (${userAddress})`;
+      document.getElementById("btnConnect").innerHTML = `🔗 Đã Kết Nối: ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+      document.getElementById("btnConnect").classList.replace("btn-connect", "btn-claim");
+
+      contractInstance = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+      addLog(`Kết nối thành công ví: ${userAddress}`, "success");
+
+      // Cập nhật trạng thái
+      updateUIState(0);
     } catch (err) {
-      setLog("Lỗi kết nối: " + (err.shortMessage || err.message));
+      addLog(`Lỗi kết nối ví: ${translateError(err)}`, "error");
     }
-  };
+  }
 
-  // Giả lập tương tác luồng người dùng để kiểm chứng UI (Mock actions)
-  document.getElementById("btnFund").onclick = () => {
-    stateNode.className = "status-tag status-funded";
-    stateNode.textContent = "Funded (Đã khóa cọc)";
-    document.getElementById("btnFund").disabled = true;
-    document.getElementById("btnConfirm").disabled = false;
-    document.getElementById("btnDispute").disabled = false;
-    document.getElementById("btnClaimDeadline").disabled = false;
-    setLog("Người mua đã nạp cọc 0.05 ETH vào hợp đồng an toàn. Người bán có thể bàn giao đồ!");
-  };
+  // Dịch mã lỗi Custom Error tiếng Việt thân thiện (Step 2 Sổ tay)
+  function translateError(err) {
+    const str = (err.shortMessage || err.message || "").toString();
+    if (str.includes("SellerCannotBeBuyer")) return "Người bán không thể tự nạp cọc mua hàng của chính mình (Chống Wash trading)!";
+    if (str.includes("NotBuyer")) return "Chỉ Người mua mới có quyền bấm xác nhận nhận hàng!";
+    if (str.includes("NotArbiter")) return "Chỉ Ban quản lý KTX (Trọng tài) mới có quyền phán quyết tranh chấp!";
+    if (str.includes("NotParty")) return "Kẻ lạ không thể can thiệp mở tranh chấp!";
+    if (str.includes("DeadlineNotReached")) return "Chưa hết thời hạn 3 ngày kiểm tra hàng, Người bán chưa thể rút tiền quá hạn!";
+    if (str.includes("DeadlinePassed")) return "Đã quá hạn kiểm tra, không thể mở tranh chấp!";
+    if (str.includes("WrongAmount")) return "Số tiền cọc nạp vào không khớp giá niêm yết!";
+    if (str.includes("WrongState")) return "Trạng thái hợp đồng hiện tại không cho phép thao tác này!";
+    if (str.includes("user rejected")) return "Người dùng đã hủy giao dịch trên MetaMask.";
+    return str;
+  }
 
-  document.getElementById("btnConfirm").onclick = () => {
-    stateNode.className = "status-tag status-completed";
-    stateNode.textContent = "Completed (Hoàn tất)";
-    document.getElementById("btnConfirm").disabled = true;
-    document.getElementById("btnDispute").disabled = true;
-    document.getElementById("btnClaimDeadline").disabled = true;
-    setLog("Người mua đã xác nhận nhận hàng! Hợp đồng trích 1% phí KTX và chuyển 99% cho Người bán.");
-  };
+  // =========================================================================
+  // CÁC HÀM TƯƠNG TÁC NGHIỆP VỤ (STEP 2: FULL FLOW)
+  // =========================================================================
 
-  document.getElementById("btnDispute").onclick = () => {
-    stateNode.className = "status-tag status-disputed";
-    stateNode.textContent = "Disputed (Đang tranh chấp)";
-    document.getElementById("btnConfirm").disabled = true;
-    document.getElementById("btnClaimDeadline").disabled = true;
-    setLog("Đã mở khiếu nại! Hợp đồng tạm khóa tiền. Trọng tài Ban quản lý KTX sẽ can thiệp phân xử.");
-  };
+  // 1. NẠP CỌC
+  async function handleFund() {
+    const btn = document.getElementById("btnFund");
+    btn.disabled = true;
+    btn.innerHTML = "⏳ Đang nạp cọc...";
 
-  document.getElementById("btnClaimDeadline").onclick = () => {
-    setLog("Kiểm tra thời hạn: Chưa hết 3 ngày kiểm tra hàng. Giao dịch revert với lỗi DeadlineNotReached()!");
-  };
+    if (currentMode === "sim" || !contractInstance) {
+      setTimeout(() => {
+        simState.stateIndex = 1;
+        simState.buyer = userAddress;
+        document.getElementById("buyerDisplay").textContent = userAddress;
+        document.getElementById("deadlineDisplay").textContent = "Còn 71 giờ 59 phút (Đang đếm ngược)";
+        updateUIState(1);
+        addLog("Sandbox: Người mua đã nạp cọc 0.05 ETH thành công! Hợp đồng chuyển sang trạng thái Funded.", "success");
+        btn.innerHTML = "💰 1. Nạp Cọc 0.05 ETH (Người Mua)";
+      }, 700);
+      return;
+    }
+
+    try {
+      addLog("Gửi giao dịch fund() tới hợp đồng ProjectCore...", "info");
+      const tx = await contractInstance.fund({ value: ethers.parseEther("0.05") });
+      addLog(`Giao dịch đã phát: ${tx.hash} (Đang chờ xác nhận...)`, "info");
+      await tx.wait();
+      addLog(`Xác nhận thành công! TxHash: ${tx.hash}`, "success");
+      updateUIState(1);
+    } catch (err) {
+      addLog(`Nạp cọc thất bại: ${translateError(err)}`, "error");
+      btn.disabled = false;
+    } finally {
+      btn.innerHTML = "💰 1. Nạp Cọc 0.05 ETH (Người Mua)";
+    }
+  }
+
+  // 2. XÁC NHẬN NHẬN HÀNG & GIẢI NGÂN
+  async function handleConfirm() {
+    const btn = document.getElementById("btnConfirm");
+    btn.disabled = true;
+    btn.innerHTML = "⏳ Đang giải ngân...";
+
+    if (currentMode === "sim" || !contractInstance) {
+      setTimeout(() => {
+        simState.stateIndex = 2;
+        updateUIState(2);
+        addLog("Sandbox: Người mua xác nhận đã nhận bàn ghế KTX an toàn!", "success");
+        addLog("-> Đã chuyển 0.0495 ETH (99%) cho Người bán & trích 0.0005 ETH (1% = 100 bps) cho Quỹ KTX.", "success");
+        btn.innerHTML = "✅ 2. Nhận Hàng & Giải Ngân";
+      }, 700);
+      return;
+    }
+
+    try {
+      addLog("Gửi giao dịch confirmReceived()...", "info");
+      const tx = await contractInstance.confirmReceived();
+      await tx.wait();
+      addLog(`Đã giải ngân thành công! Hợp đồng Completed. TxHash: ${tx.hash}`, "success");
+      updateUIState(2);
+    } catch (err) {
+      addLog(`Giải ngân thất bại: ${translateError(err)}`, "error");
+      btn.disabled = false;
+    } finally {
+      btn.innerHTML = "✅ 2. Nhận Hàng & Giải Ngân";
+    }
+  }
+
+  // 3. RÚT TIỀN QUÁ HẠN
+  async function handleClaimDeadline() {
+    if (currentMode === "sim" || !contractInstance) {
+      addLog("Kiểm tra thời gian: Chưa hết hạn 3 ngày kiểm tra! Revert: DeadlineNotReached()", "error");
+      return;
+    }
+    try {
+      const tx = await contractInstance.claimPaymentAfterDeadline();
+      await tx.wait();
+      addLog("Rút tiền quá hạn thành công!", "success");
+      updateUIState(2);
+    } catch (err) {
+      addLog(`Bị chặn đúng quy tắc: ${translateError(err)}`, "error");
+    }
+  }
+
+  // 4. MỞ TRANH CHẤP
+  async function handleDispute() {
+    if (currentMode === "sim" || !contractInstance) {
+      simState.stateIndex = 4;
+      updateUIState(4);
+      addLog("Đã mở khiếu nại! Bàn học bị gãy chân khi nhận. Chuyển hồ sơ sang BQL KTX phân xử.", "error");
+      return;
+    }
+    try {
+      const tx = await contractInstance.raiseDispute();
+      await tx.wait();
+      addLog("Đã mở tranh chấp on-chain!", "error");
+      updateUIState(4);
+    } catch (err) {
+      addLog(`Mở tranh chấp thất bại: ${translateError(err)}`, "error");
+    }
+  }
+
+  // 5. TRỌNG TÀI PHÁN QUYẾT
+  async function handleResolve(decision) {
+    if (currentMode === "sim" || !contractInstance) {
+      if (decision === 1) {
+        simState.stateIndex = 2;
+        addLog("BQL KTX ra phán quyết #1: Hàng đúng mô tả. Giải ngân 99% cho Người bán và 1% Quỹ KTX.", "success");
+      } else {
+        simState.stateIndex = 3;
+        addLog("BQL KTX ra phán quyết #2: Hàng lỗi do người bán. Hoàn 100% tiền cọc 0.05 ETH cho Người mua!", "info");
+      }
+      updateUIState(simState.stateIndex);
+      return;
+    }
+    try {
+      const tx = await contractInstance.resolveDispute(decision);
+      await tx.wait();
+      addLog(`Trọng tài đã phán quyết thành công! TxHash: ${tx.hash}`, "success");
+      updateUIState(decision === 1 ? 2 : 3);
+    } catch (err) {
+      addLog(`Phán quyết thất bại: ${translateError(err)}`, "error");
+    }
+  }
+
+  // Khởi chạy ban đầu
+  window.addEventListener("DOMContentLoaded", () => {
+    updateUIState(0);
+    // Tự động kiểm tra nếu có ví
+    if (window.ethereum) {
+      addLog("Phát hiện tiện ích MetaMask sẵn sàng kết nối.", "info");
+    } else {
+      addLog("Không có ví Web3 sẵn có, tự động kích hoạt chế độ Sandbox để trải nghiệm.", "info");
+      switchMode("sim");
+    }
+  });
 </script>
 </body>
 </html>

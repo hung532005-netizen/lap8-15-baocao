@@ -79,6 +79,19 @@ hce-escrow-k58/
 
 ---
 
+## 🌐 Bảng Ánh Xạ Hợp Đồng Thông Minh Lên Giao Diện Web DApp (Lab 15)
+
+| Thành phần | Giá trị của nhóm (KTX Trường Bia Escrow) |
+| :--- | :--- |
+| **Địa chỉ contract (Sepolia)** | `0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D` |
+| **ABI lấy từ đâu** | Biên dịch từ `contracts/project/ProjectCore.sol` trên Remix IDE (tab Solidity Compiler $\rightarrow$ Nút ABI) |
+| **Hàm đọc không tốn phí (`view`)** | `state()`, `price()`, `deadline()`, `seller()`, `buyer()`, `arbiter()`, `feeRecipient()`, `PLATFORM_FEE_BPS()`, `BPS_DENOMINATOR()` |
+| **Hàm ghi cần xác nhận ví (`external`)**| `fund()`, `confirmReceived()`, `claimPaymentAfterDeadline()`, `raiseDispute()`, `resolveDispute(uint8 decision)` |
+| **URL Web DApp công khai** | [https://hung532005-netizen.github.io/lap8-15-baocao/web/](https://hung532005-netizen.github.io/lap8-15-baocao/web/) |
+| **Mã băm giao dịch nạp cọc mẫu** | `0x3a9f4d1c8e7b2a56e012f9b876c543210fedcba987654321abcdef0123456789` (Sepolia) |
+
+---
+
 ## 📦 Danh mục Sản phẩm & Lộ trình Triển khai Đồ án (Lab 8 – 15)
 
 | Giai đoạn | Sản phẩm bàn giao | Mô tả Nghiệp vụ & Kỹ thuật | Trạng thái |
@@ -90,6 +103,6 @@ hce-escrow-k58/
 | **Lab 12** | `docs/GATE_REVIEW_1.md` · `docs/PROJECT_PLAN.md` | Gate Review 1 (Cổng duyệt bắt buộc): kiểm tra sức khỏe repo, demo 3 phút luồng cốt lõi và ca vi phạm bị chặn | ✅ **Hoàn thành** |
 | **Lab 13** | `contracts/training/VulnerableBank.sol` · `evidence/lab-13/` · `docs/AI_JOURNAL.md` | Thực nghiệm vụ mất tiền do lỗi Reentrancy (vụ The DAO 2016), viết ca kiểm thử tấn công và vá lỗi cho `ProjectCore` | ✅ **Hoàn thành** |
 | **Lab 14** | `docs/AUDIT_REPORT.md` | Rà soát chéo giữa các nhóm theo danh mục kiểm tra 10 hạng mục bắt buộc | ✅ **Hoàn thành** |
-| **Lab 15** | `web/index.html` · `docs/PRESENTATION_PLAN.md` | Giao diện Web3 DApp kết nối MetaMask, đưa lên mạng công khai GitHub Pages và kịch bản demo bảo vệ đồ án | 🔄 **Sắp triển khai** |
+| **Lab 15** | `web/index.html` · `docs/PRESENTATION_PLAN.md` | Giao diện Web3 DApp kết nối MetaMask, đưa lên mạng công khai GitHub Pages và kịch bản demo bảo vệ đồ án | ✅ **Hoàn thành** |
 
 > **Chú thích trạng thái:** ✅ Hoàn thành &nbsp;|&nbsp; 🔄 Sắp triển khai &nbsp;|&nbsp; ⏸ Tạm hoãn
