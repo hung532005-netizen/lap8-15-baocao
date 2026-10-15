@@ -1,0 +1,17 @@
+{
+  "name": "ktx-truong-bia-backend",
+  "version": "2.0.0",
+  "description": "Backend REST API cho nen tang mua ban do cu KTX Truong Bia (Web3 Escrow Sepolia)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.0",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2"
+  }
+}

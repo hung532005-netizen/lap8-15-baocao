@@ -2208,6 +2208,125 @@
 </div>
 <script>
   // =========================================================================
+  // PROJECTCORE MULTI-ORDER ESCROW ABI (MUC 22 & 23 - ETHERS.JS V6)
+  // =========================================================================
+  const PROJECT_CORE_ABI = [
+    "function owner() view returns (address)",
+    "function arbiter() view returns (address)",
+    "function platformFeeBps() view returns (uint16)",
+    "function isAdminOrArbiter(address account) view returns (bool isOwnerRole, bool isArbiterRole)",
+    "function calculatePayout(uint256 grossAmount) view returns (uint256 sellerPayout, uint256 fee)",
+    "function getListingLockStatus(string listingCode) view returns (bytes32 listingKey, bool isSold, bool hasOpenEscrow, uint256 activeOrderId)",
+    "function getOrder(uint256 orderId) view returns (tuple(uint256 orderId, bytes32 listingKey, string listingCode, address buyer, address seller, uint256 amount, uint256 platformFee, uint256 sellerPayout, uint256 buyerRefund, uint256 createdAt, uint256 deadline, uint256 completedAt, uint8 status, address disputedBy, string disputeReason, string resolutionNote))",
+    "function getOrdersByBuyer(address buyer) view returns (uint256[])",
+    "function getOrdersBySeller(address seller) view returns (uint256[])",
+    "function getContractStats() view returns (uint256 totalOrders, uint256 openEscrows, uint256 completedOrders, uint256 activeDisputes, uint256 totalVolumeWei, uint16 feeBps)",
+    "function createAndFundOrder(string listingCode, address seller, uint256 customDuration) payable returns (uint256)",
+    "function confirmDelivery(uint256 orderId)",
+    "function claimAfterDeadline(uint256 orderId)",
+    "function sellerCancelAndRefund(uint256 orderId, string reason)",
+    "function openDispute(uint256 orderId, string reason)",
+    "function resolveDispute(uint256 orderId, uint16 buyerShareBps, bool markListingAsSold, string resolutionNote)",
+    "event OrderCreated(uint256 indexed orderId, bytes32 indexed listingKey, string listingCode, address indexed buyer, address seller, uint256 amount, uint256 deadline)",
+    "event DeliveryConfirmed(uint256 indexed orderId, bytes32 indexed listingKey, address indexed buyer, address indexed seller, uint256 sellerPayout, uint256 platformFee)",
+    "event DisputeOpened(uint256 indexed orderId, bytes32 indexed listingKey, address indexed openedBy, string reason)",
+    "event DisputeResolved(uint256 indexed orderId, address indexed arbiter, uint256 buyerRefund, uint256 sellerPayout, uint256 platformFee, string resolutionNote)"
+  ];
+
+  // =========================================================================
+  // KTX BACKEND CLIENT (JWT + SIWE NONCE + TEST 20 OFFLINE RESILIENCE)
+  // =========================================================================
+  const API_BASE_URL = "http://localhost:4000/api";
+
+  class KtxBackendClient {
+    static getToken() {
+      return sessionStorage.getItem("ktx_jwt_token") || "";
+    }
+
+    static setToken(token) {
+      if (token) sessionStorage.setItem("ktx_jwt_token", token);
+      else sessionStorage.removeItem("ktx_jwt_token");
+    }
+
+    static async request(endpoint, options = {}) {
+      const headers = {
+        "Content-Type": "application/json",
+        ...(options.headers || {})
+      };
+      const token = this.getToken();
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+          ...options,
+          headers
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          const err = new Error(data.message || "Lỗi xử lý từ máy chủ.");
+          err.code = data.error || "API_ERROR";
+          err.fieldErrors = data.fieldErrors || null;
+          throw err;
+        }
+        return data;
+      } catch (error) {
+        // Xu ly Test 20: Backend mat ket noi
+        if (error.name === "TypeError" && error.message.includes("fetch")) {
+          const netErr = new Error(
+            "Không thể kết nối tới máy chủ Backend. Dữ liệu đang nhập trên biểu mẫu đã được giữ nguyên an toàn (Test 20)."
+          );
+          netErr.code = "BACKEND_OFFLINE";
+          throw netErr;
+        }
+        throw error;
+      }
+    }
+
+    // Dang nhap bang chu ky MetaMask (Chong gia mao LocalStorage - Muc 18.2 & 18.3)
+    static async loginWithMetaMask(portal = "STUDENT") {
+      if (!window.ethereum) throw new Error("Vui lòng cài đặt ví MetaMask.");
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      const wallet = accounts[0];
+
+      const { messageToSign } = await this.request("/auth/nonce", {
+        method: "POST",
+        body: JSON.stringify({ wallet, portal })
+      });
+
+      const signature = await window.ethereum.request({
+        method: "personal_sign",
+        params: [messageToSign, wallet]
+      });
+
+      const result = await this.request("/auth/verify", {
+        method: "POST",
+        body: JSON.stringify({ wallet, signature, portal })
+      });
+
+      this.setToken(result.token);
+      return result.user;
+    }
+
+    // Gui bai dang moi kem co che tu dong luu nhap khi mat ket noi (Muc 21 & Test 20)
+    static async createListing(formPayload) {
+      try {
+        const result = await this.request("/listings", {
+          method: "POST",
+          body: JSON.stringify(formPayload)
+        });
+        localStorage.removeItem("ktx_listing_form_draft");
+        return result;
+      } catch (error) {
+        if (error.code === "BACKEND_OFFLINE") {
+          // Bao toan du lieu chua gui vao ban nhap cuc bo nhung khong bao dang bai thanh cong
+          localStorage.setItem("ktx_listing_form_draft", JSON.stringify(formPayload));
+        }
+        throw error;
+      }
+    }
+  }
+
+  // =========================================================================
   // MODULE 1: CAU HINH HE THONG (ConfigManager)
   // =========================================================================
   const ConfigManager = {
@@ -2459,18 +2578,51 @@
     isAdminLoggedIn: false,
     studentState: "student-badge-disconnected", // 7 trang thai
 
-    loginAdmin() {
+    async loginAdmin() {
       const acc = document.getElementById("inpAdminAccount").value.trim();
       const pwd = document.getElementById("inpAdminPassword").value;
 
-      // Kiem tra xac thuc
+      // 1. Uu tien dang nhap Web3 SIWE neu vi da ket noi
+      if (userAddress) {
+        try {
+          NotificationService.addLog("Dang yeu cau xac thuc chu ky MetaMask SIWE...", "info");
+          const user = await KtxBackendClient.loginWithMetaMask("ADMIN");
+          this.isAdminLoggedIn = true;
+          NotificationService.showToast(`Xác thực Web3 Admin thành công (${user.adminRole})!`, "success");
+          AuditLogService.log("Admin Web3", "Đăng nhập", "Admin Portal", `Role: ${user.adminRole}`);
+          this.checkAdminView();
+          return;
+        } catch (e) {
+          if (e.code === "BACKEND_OFFLINE") {
+            NotificationService.addLog("Backend offline (Test 20) - Chuyen sang kiem tra quyen on-chain/noi bo", "warning");
+          } else {
+            NotificationService.addLog("Xac thuc Web3: " + e.message, "warning");
+          }
+        }
+
+        // Kiem tra quyen on-chain
+        try {
+          const onChain = await EscrowService.verifyOnChainRole(userAddress);
+          if (onChain.hasAdminAccess) {
+            this.isAdminLoggedIn = true;
+            NotificationService.showToast("Xác thực quyền Admin/Trọng tài trên Smart Contract thành công!", "success");
+            AuditLogService.log("Admin On-chain", "Đăng nhập", "Admin Portal", onChain.isOwnerRole ? "Super Admin" : "Trọng tài KTX");
+            this.checkAdminView();
+            return;
+          }
+        } catch (e) {
+          // tiep tuc fallback
+        }
+      }
+
+      // 2. Kiem tra xac thuc tai khoan Ban Quan Ly noi bo (Fallback an toan)
       if (acc === "admin_ktx" && pwd === "BQL_TruongBia_2026") {
         this.isAdminLoggedIn = true;
         NotificationService.showToast("Đăng nhập quyền Quản trị thành công!", "success");
         AuditLogService.log("Ban Quản Lý KTX", "Đăng nhập", "Admin Portal", "Xác thực tài khoản thành công");
         this.checkAdminView();
       } else {
-        NotificationService.showToast("Sai tài khoản hoặc mật khẩu quản trị!", "error");
+        NotificationService.showToast("Sai tài khoản hoặc mật khẩu quản trị! (Hoặc kết nối ví có quyền Owner/Arbiter)", "error");
       }
     },
     logoutAdmin() {
@@ -2720,7 +2872,114 @@
     }
   };
 
-  const EscrowService = {
+  class EscrowServiceClass {
+    constructor(contractAddress) {
+      this.contractAddress = contractAddress || ConfigManager.CONTRACT_ADDRESS;
+      this.sepoliaChainIdHex = "0xaa36a7"; // 11155111
+    }
+
+    async getReadContract() {
+      if (!window.ethereum) throw new Error("Vui lòng cài đặt ví MetaMask.");
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      return new ethers.Contract(this.contractAddress, PROJECT_CORE_ABI, provider);
+    }
+
+    async getWriteContract() {
+      if (!window.ethereum) throw new Error("Vui lòng cài đặt ví MetaMask.");
+      const chainId = await window.ethereum.request({ method: "eth_chainId" });
+      if (chainId.toLowerCase() !== this.sepoliaChainIdHex) {
+        throw new Error("Sai mạng! Vui lòng chuyển MetaMask sang mạng Sepolia (Chain ID: 11155111).");
+      }
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      return new ethers.Contract(this.contractAddress, PROJECT_CORE_ABI, signer);
+    }
+
+    // Kiem tra quyen Admin / Trong tai on-chain (Muc 18.2)
+    async verifyOnChainRole(walletAddress) {
+      try {
+        const contract = await this.getReadContract();
+        const [isOwnerRole, isArbiterRole] = await contract.isAdminOrArbiter(walletAddress);
+        return { isOwnerRole, isArbiterRole, hasAdminAccess: isOwnerRole || isArbiterRole };
+      } catch (err) {
+        return { isOwnerRole: false, isArbiterRole: false, hasAdminAccess: false };
+      }
+    }
+
+    // Kiem tra truoc khi xoa/an bai cua Admin (Test 18)
+    async canSafelyDeleteListing(listingCode) {
+      try {
+        const contract = await this.getReadContract();
+        const status = await contract.getListingLockStatus(listingCode);
+        if (status.hasOpenEscrow) {
+          return {
+            allowed: false,
+            reason: `Không thể xóa! Bài đăng đang có giao dịch ký quỹ mở (Order #${status.activeOrderId}).`
+          };
+        }
+        return { allowed: true, reason: "" };
+      } catch (err) {
+        const listing = MarketplaceService.listings.find(l => (l.listingCode === listingCode || String(l.id) === String(listingCode)));
+        if (listing && (listing.isSold || listing.status === "in_escrow")) {
+          return {
+            allowed: false,
+            reason: `Không thể xóa! Bài đăng đang có giao dịch ký quỹ mở (Test 18).`
+          };
+        }
+        return { allowed: true, reason: "" };
+      }
+    }
+
+    // Mua san pham qua MetaMask (Muc 22.1, Test 15, Test 16, Test 19)
+    async buyItemWithEscrow(listingCode, sellerAddress, priceEth, durationSeconds = 0, onTxSubmitted) {
+      try {
+        const readContract = await this.getReadContract();
+        const lockStatus = await readContract.getListingLockStatus(listingCode);
+
+        if (lockStatus.isSold) {
+          throw new Error("Sản phẩm này đã được bán trên blockchain.");
+        }
+        if (lockStatus.hasOpenEscrow) {
+          throw new Error(`Sản phẩm đang trong quá trình ký quỹ bởi đơn hàng #${lockStatus.activeOrderId}.`);
+        }
+
+        const writeContract = await this.getWriteContract();
+        const valueWei = ethers.parseEther(String(priceEth));
+
+        const tx = await writeContract.createAndFundOrder(listingCode, sellerAddress, durationSeconds, {
+          value: valueWei
+        });
+
+        if (typeof onTxSubmitted === "function") {
+          onTxSubmitted(tx.hash);
+        }
+
+        // Cho receipt thuc te tren Sepolia roi doc lai trang thai on-chain (Muc 23.1)
+        const receipt = await tx.wait(1);
+        if (!receipt || receipt.status !== 1) {
+          throw new Error("Giao dịch bị Revert trên mạng Sepolia.");
+        }
+
+        const updatedLock = await readContract.getListingLockStatus(listingCode);
+        const onChainOrder = await readContract.getOrder(updatedLock.activeOrderId);
+
+        return {
+          success: true,
+          txHash: receipt.hash,
+          orderId: Number(onChainOrder.orderId),
+          order: onChainOrder
+        };
+      } catch (error) {
+        if (error.code === 4001 || error.code === "ACTION_REJECTED") {
+          throw new Error("Bạn đã hủy xác nhận giao dịch trên ví MetaMask.");
+        }
+        throw new Error(error.reason || error.shortMessage || error.message || "Lỗi giao dịch Web3.");
+      }
+    }
+
+    // ==========================================
+    // CAC HAM TUONG TAC GIAO DIEN & ESCROW HIEN HUU
+    // ==========================================
     async handleFund() {
       if (!contractInstance) {
         await WalletManager.connectWallet();
@@ -2745,12 +3004,14 @@
         if (btn) btn.innerHTML = "💰 1. Nạp Cọc 0.05 ETH (fund)";
         UIRenderer.updateButtons(contractDataCache.stateIndex);
       }
-    },
-    openConfirmModal() { document.getElementById("confirmPayoutModal").classList.add("active"); },
-    openDisputeModal() { document.getElementById("disputeModal").classList.add("active"); },
+    }
+
+    openConfirmModal() { document.getElementById("confirmPayoutModal").classList.add("active"); }
+    openDisputeModal() { document.getElementById("disputeModal").classList.add("active"); }
     closeModals() {
       document.querySelectorAll(".modal-backdrop").forEach(m => m.classList.remove("active"));
-    },
+    }
+
     async executeConfirmReceived() {
       this.closeModals();
       if (!contractInstance) return;
@@ -2770,7 +3031,8 @@
         if (btn) btn.innerHTML = "✅ 2. Nhận Hàng & Giải Ngân (confirmReceived)";
         UIRenderer.updateButtons(contractDataCache.stateIndex);
       }
-    },
+    }
+
     async handleClaimDeadline() {
       if (!contractInstance) return;
       try {
@@ -2781,7 +3043,8 @@
       } catch (err) {
         NotificationService.addLog("Rut tien that bai: " + ErrorTranslator.translate(err), "error");
       }
-    },
+    }
+
     async executeRaiseDispute() {
       this.closeModals();
       if (!contractInstance) return;
@@ -2793,7 +3056,8 @@
       } catch (err) {
         NotificationService.addLog("Mo tranh chap that bai: " + ErrorTranslator.translate(err), "error");
       }
-    },
+    }
+
     async handleResolve(decision) {
       if (!contractInstance) return;
       try {
@@ -2804,12 +3068,42 @@
       } catch (err) {
         NotificationService.addLog("Phan quyet that bai: " + ErrorTranslator.translate(err), "error");
       }
-    },
-    buyCurrentProduct() {
+    }
+
+    async buyCurrentProduct() {
       this.closeModals();
+      const currentItem = MarketplaceService.listings[0] || {};
+      try {
+        NotificationService.showToast("Đang kết nối ví và kiểm tra trạng thái ký quỹ...", "info");
+        if (window.ethereum && currentItem.title) {
+          const sellerAddr = currentItem.sellerWallet || contractDataCache.seller;
+          const listingCode = currentItem.listingCode || `KTX-${currentItem.id}`;
+          const res = await this.buyItemWithEscrow(
+            listingCode,
+            sellerAddr,
+            currentItem.priceEth || "0.05",
+            0,
+            (hash) => {
+              NotificationService.addLog(`Giao dich ky quy da gui: ${hash}`, "info", hash);
+            }
+          );
+          NotificationService.addLog(`Ky quy thanh cong Order #${res.orderId}! Tx: ${res.txHash}`, "success", res.txHash);
+          NotificationService.showToast(`Nạp cọc ký quỹ thành công! Mã đơn #${res.orderId}`, "success");
+          return;
+        }
+      } catch (err) {
+        if (err.message && err.message.includes("Bạn đã hủy")) {
+          NotificationService.showToast(err.message, "warning");
+          NotificationService.addLog(err.message, "warning");
+          return;
+        }
+        NotificationService.addLog("Thu chuyen sang goi hop dong mac dinh: " + ErrorTranslator.translate(err), "info");
+      }
       this.handleFund();
     }
-  };
+  }
+
+  const EscrowService = new EscrowServiceClass();
 
   // =========================================================================
   // MODULE 10: MARKETPLACE & LISTING SERVICE (7 DANH MUC & KIEM DUYET)
@@ -2975,7 +3269,7 @@
       document.getElementById("productDetailModal").classList.add("active");
     },
 
-    submitNewListing() {
+    async submitNewListing() {
       const title = document.getElementById("inpPostTitle").value.trim();
       const category = document.getElementById("selPostCategory").value;
       const priceEth = parseFloat(document.getElementById("inpPostPrice").value);
@@ -2985,8 +3279,36 @@
 
       const profile = StudentProfileService.getProfile() || { name: "Sinh viên KTX", studentId: "23K4300007" };
 
+      // Chuan bi payload gui Backend API
+      const formPayload = {
+        title,
+        category: category || "Đồ dùng phòng KTX",
+        priceEth: String(priceEth || "0.01"),
+        description: desc || "Mô tả sản phẩm phòng KTX",
+        condition: condition || "Tốt",
+        images: ["data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect width='100' height='100' fill='%236366f1'/></svg>"],
+        deliveryMethod: room || "Phòng KTX",
+        publicContact: profile.roomNumber || room || "KTX Trường Bia",
+        confirmOwnership: true,
+        acceptTerms: true,
+        submitForReview: true
+      };
+
+      try {
+        await KtxBackendClient.createListing(formPayload);
+        NotificationService.showToast("Đã gửi bài đăng lên Backend thành công!", "success");
+      } catch (err) {
+        if (err.code === "BACKEND_OFFLINE") {
+          NotificationService.showToast(err.message, "warning");
+          NotificationService.addLog("Backend offline (Test 20): Ban nhap da duoc bao toan trong LocalStorage", "warning");
+        } else {
+          NotificationService.showToast(err.message || "Lỗi gửi bài đăng", "info");
+        }
+      }
+
       const newListing = {
         id: Date.now(),
+        listingCode: `KTX-${Date.now().toString().slice(-6)}`,
         title,
         category,
         priceEth,
@@ -3075,14 +3397,22 @@
       document.getElementById("adminRejectModal").classList.add("active");
     },
 
-    confirmRejectListing() {
+    async confirmRejectListing() {
       const reason = document.getElementById("inpAdminRejectReason").value.trim();
       if (!reason) {
-        alert("Vui lòng nhập lý do từ chối bài đăng!");
+        alert("Vui lòng nhập lý do từ chối bài đăng! (Bắt buộc theo Test 14)");
         return;
       }
       const item = this.listings.find(l => l.id === this.currentRejectListingId);
       if (item) {
+        // Kiem tra khoa Escrow (Test 18)
+        const check = await EscrowService.canSafelyDeleteListing(item.listingCode || `KTX-${item.id}`);
+        if (!check.allowed) {
+          alert(check.reason);
+          NotificationService.showToast(check.reason, "error");
+          return;
+        }
+
         item.status = "rejected";
         item.rejectReason = reason;
         AuditLogService.log("Admin BQL", "Từ chối bài", item.title, `Lý do: ${reason}`);
