@@ -1,0 +1,1249 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>KTX Trường Bia — Ký Quỹ Mua Bán Đồ Cũ Sinh Viên | Web3 Escrow DApp</title>
+  <meta name="description" content="DApp ký quỹ hợp đồng thông minh cho sinh viên KTX Trường Bia mua bán đồ cũ an toàn on-chain">
+  <meta name="theme-color" content="#090d16">
+  
+  <!-- Font chu hien dai Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Nap thu vien Ethers.js v6 qua CDN Cloudflare/cdnjs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(15, 23, 42, 0.88);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-border-hover: rgba(99, 102, 241, 0.45);
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-glow: rgba(79, 70, 229, 0.35);
+      --secondary: #06b6d4;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --metamask: #f6851b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --surface: rgba(255, 255, 255, 0.04);
+      --surface-hover: rgba(255, 255, 255, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(ellipse at 50% 0%, #1e1b4b 0%, #090d16 75%);
+      background-attachment: fixed;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 12px;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 840px;
+    }
+
+    /* Thanh dieu huong tren cung (Top Navigation Bar) */
+    .top-nav {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .top-nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #e2e8f0;
+    }
+
+    .top-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .nav-btn-metamask {
+      background: rgba(246, 133, 27, 0.14);
+      color: #fb923c;
+      border: 1px solid rgba(246, 133, 27, 0.35);
+    }
+    .nav-btn-metamask:hover {
+      background: rgba(246, 133, 27, 0.26);
+      transform: translateY(-1px);
+    }
+
+    .nav-btn-remix {
+      background: rgba(99, 102, 241, 0.14);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.35);
+    }
+    .nav-btn-remix:hover {
+      background: rgba(99, 102, 241, 0.26);
+      transform: translateY(-1px);
+    }
+
+    .nav-btn-etherscan {
+      background: rgba(56, 189, 248, 0.14);
+      color: #7dd3fc;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+    .nav-btn-etherscan:hover {
+      background: rgba(56, 189, 248, 0.26);
+      transform: translateY(-1px);
+    }
+
+    .nav-btn-faucet {
+      background: rgba(16, 185, 129, 0.14);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .nav-btn-faucet:hover {
+      background: rgba(16, 185, 129, 0.26);
+      transform: translateY(-1px);
+    }
+
+    /* Banner tien ich ho tro nguoi dung mo tren dien thoai */
+    .mobile-tip-banner {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(6, 182, 212, 0.08));
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: 14px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .mobile-tip-content {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+    }
+    .mobile-tip-icon {
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+    .mobile-tip-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .mobile-action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      border-radius: 8px;
+      text-decoration: none;
+      background: linear-gradient(135deg, rgba(246, 133, 27, 0.25), rgba(234, 88, 12, 0.25));
+      color: #fed7aa;
+      border: 1px solid rgba(246, 133, 27, 0.4);
+      transition: all 0.2s ease;
+    }
+    .mobile-action-btn:hover {
+      background: linear-gradient(135deg, rgba(246, 133, 27, 0.4), rgba(234, 88, 12, 0.4));
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    /* Header & Badges */
+    header {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .badge-wrapper {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #a5b4fc;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-net {
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.12);
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+
+    h1 {
+      font-size: clamp(1.4rem, 4vw, 2.1rem);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 40%, #c7d2fe 75%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+      line-height: 1.25;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: clamp(0.8rem, 2.5vw, 0.92rem);
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    /* The Card Glassmorphism */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+      margin-bottom: 18px;
+      transition: border-color 0.25s ease;
+    }
+    .card:hover {
+      border-color: var(--card-border-hover);
+    }
+
+    .card-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* Banner mon hang sinh vien */
+    .item-banner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+    }
+
+    .item-icon {
+      font-size: 1.8rem;
+      background: rgba(255, 255, 255, 0.05);
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+
+    .item-meta h3 {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+    }
+
+    .item-meta p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Bang thong tin doc (View Functions) */
+    .data-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .data-cell {
+      background: var(--surface);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 10px 12px;
+      transition: background 0.2s ease;
+    }
+    .data-cell:hover {
+      background: var(--surface-hover);
+    }
+
+    .data-cell .label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .data-cell .value {
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      color: #f1f5f9;
+      word-break: break-all;
+      line-height: 1.35;
+    }
+
+    .data-cell .value.highlight {
+      color: #38bdf8;
+      font-weight: 700;
+    }
+
+    .link-tag {
+      font-size: 0.7rem;
+      color: #818cf8;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      font-weight: 600;
+    }
+    .link-tag:hover {
+      text-decoration: underline;
+      color: #a5b4fc;
+    }
+
+    /* Trang thai State Pill */
+    .status-tag {
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.76rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .status-created { background: rgba(59, 130, 246, 0.16); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.35); }
+    .status-funded { background: rgba(245, 158, 11, 0.16); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.35); }
+    .status-completed { background: rgba(16, 185, 129, 0.16); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.35); }
+    .status-refunded { background: rgba(148, 163, 184, 0.16); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.35); }
+    .status-disputed { background: rgba(239, 68, 68, 0.16); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.35); }
+
+    /* Cac nut hanh dong - TO, RO RANG, CO TRANG THAI DANG XU LY */
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button {
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.88rem;
+      padding: 13px 16px;
+      min-height: 48px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      position: relative;
+      touch-action: manipulation;
+      text-align: center;
+      line-height: 1.3;
+    }
+    button:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+    
+    /* Trang thai dang xu ly va disabled ro rang */
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.52;
+      box-shadow: none !important;
+      transform: none !important;
+      filter: saturate(60%);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .btn-connect {
+      background: linear-gradient(135deg, #f6851b 0%, #ea580c 100%);
+      color: #ffffff;
+      border: 1px solid rgba(246, 133, 27, 0.5);
+      box-shadow: 0 4px 16px rgba(246, 133, 27, 0.35);
+    }
+    .btn-connect:hover:not(:disabled) {
+      background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+      box-shadow: 0 6px 22px rgba(246, 133, 27, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .btn-fund {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #ffffff;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.28);
+    }
+    .btn-fund:hover:not(:disabled) {
+      background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+      transform: translateY(-1px);
+    }
+
+    .btn-confirm {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      color: #ffffff;
+      border: 1px solid rgba(52, 211, 153, 0.35);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.28);
+    }
+    .btn-confirm:hover:not(:disabled) {
+      background: linear-gradient(135deg, #047857 0%, #059669 100%);
+      transform: translateY(-1px);
+    }
+
+    .btn-claim {
+      background: rgba(99, 102, 241, 0.12);
+      color: #c7d2fe;
+      border: 1px solid rgba(99, 102, 241, 0.35);
+    }
+    .btn-claim:hover:not(:disabled) {
+      background: rgba(99, 102, 241, 0.22);
+      transform: translateY(-1px);
+    }
+
+    .btn-dispute {
+      background: rgba(239, 68, 68, 0.12);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+    .btn-dispute:hover:not(:disabled) {
+      background: rgba(239, 68, 68, 0.22);
+      transform: translateY(-1px);
+    }
+
+    .full-row {
+      grid-column: 1 / -1;
+    }
+
+    /* Bang dieu khien trong tai */
+    .arbiter-panel {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(139, 92, 246, 0.06);
+      border: 1px dashed rgba(139, 92, 246, 0.35);
+    }
+    .arbiter-panel h4 {
+      font-size: 0.85rem;
+      color: #c4b5fd;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .arbiter-buttons-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Hop nhat ky giao dich on-chain */
+    .log-box {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.78rem;
+      color: #cbd5e1;
+      font-family: 'JetBrains Mono', monospace;
+      line-height: 1.55;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+    .log-box::-webkit-scrollbar {
+      width: 6px;
+    }
+    .log-box::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+    .log-entry { margin-bottom: 6px; }
+    .log-entry:last-child { margin-bottom: 0; }
+    .log-time { color: var(--text-muted); font-size: 0.72rem; margin-right: 6px; }
+    .log-success { color: #34d399; }
+    .log-error { color: #f87171; }
+    .log-info { color: #60a5fa; }
+
+    footer {
+      text-align: center;
+      margin-top: auto;
+      padding-top: 20px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    footer a { color: #818cf8; text-decoration: none; font-weight: 600; }
+    footer a:hover { text-decoration: underline; }
+
+    /* RESPONSIVE CHO DIEN THOAI (Mobile-First Optimization) */
+    @media (max-width: 640px) {
+      body {
+        padding: 10px 8px;
+      }
+      .top-nav {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 10px;
+        gap: 8px;
+      }
+      .top-nav-brand {
+        justify-content: center;
+        font-size: 0.85rem;
+      }
+      .top-nav-links {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+      .nav-btn {
+        justify-content: center;
+        padding: 7px 8px;
+        font-size: 0.72rem;
+      }
+      .mobile-tip-banner {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+      }
+      .mobile-tip-actions {
+        display: flex;
+        flex-direction: column;
+      }
+      .mobile-action-btn {
+        justify-content: center;
+        padding: 8px;
+      }
+      .card {
+        padding: 14px 12px;
+        border-radius: 16px;
+      }
+      .item-banner {
+        padding: 10px 12px;
+        gap: 10px;
+      }
+      .item-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 1.5rem;
+      }
+      .item-meta h3 {
+        font-size: 0.9rem;
+      }
+      .item-meta p {
+        font-size: 0.74rem;
+      }
+      .data-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .data-cell {
+        padding: 8px 10px;
+      }
+      .data-cell .value {
+        font-size: 0.82rem;
+      }
+      .actions-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin-top: 14px;
+      }
+      button {
+        min-height: 48px;
+        font-size: 0.85rem;
+        padding: 12px 14px;
+      }
+      .arbiter-buttons-row {
+        flex-direction: column;
+        gap: 6px;
+      }
+      .arbiter-buttons-row button {
+        width: 100%;
+      }
+      .log-box {
+        max-height: 130px;
+        font-size: 0.72rem;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Thanh dieu huong tren cung -->
+  <div class="top-nav">
+    <div class="top-nav-brand">
+      <span>🏛️ Đại Học Kinh Tế Huế · ECO2432</span>
+    </div>
+    <div class="top-nav-links">
+      <a href="chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/home.html#/" target="_blank" rel="noopener noreferrer" class="nav-btn nav-btn-metamask" title="Mo tien ich vi MetaMask tren trinh duyet">
+        🦊 Ví MetaMask ↗
+      </a>
+      <a href="https://remix.ethereum.org/#lang=en&optimize&runs=200&evmVersion&version=soljson-v0.8.30+commit.73712a01.js" target="_blank" rel="noopener noreferrer" class="nav-btn nav-btn-remix" title="Mo hop dong tren Remix Ethereum IDE">
+        ⚡ Remix IDE ↗
+      </a>
+      <a href="https://sepolia.etherscan.io/address/0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D" target="_blank" rel="noopener noreferrer" class="nav-btn nav-btn-etherscan" title="Xem hop dong tren Sepolia Etherscan">
+        🔍 Etherscan ↗
+      </a>
+      <a href="https://cloud.google.com/application/web3/faucet/ethereum/sepolia" target="_blank" rel="noopener noreferrer" class="nav-btn nav-btn-faucet" title="Nhan Sepolia ETH tu Google Cloud Web3 Faucet">
+        💧 Faucet ETH ↗
+      </a>
+    </div>
+  </div>
+
+  <!-- Banner tien ich ho tro mo tren dien thoai -->
+  <div class="mobile-tip-banner">
+    <div class="mobile-tip-content">
+      <span class="mobile-tip-icon">📱</span>
+      <div>
+        <strong>Dùng trên điện thoại:</strong> Mở link này bằng <em>MetaMask Mobile Browser</em> để kết nối ví trực tiếp.
+      </div>
+    </div>
+    <div class="mobile-tip-actions">
+      <a href="https://metamask.app.link/dapp/hung532005-netizen.github.io/lap8-15-baocao/web/" target="_blank" rel="noopener noreferrer" class="mobile-action-btn" title="Mo truc tiep tren app MetaMask Mobile">
+        📲 Mở Bằng MetaMask Mobile ↗
+      </a>
+    </div>
+  </div>
+
+  <header>
+    <div class="badge-wrapper">
+      <span class="badge">ECO2432 · Đồ Án Nhóm K58</span>
+      <span class="badge badge-net" id="networkBadge">Mạng Sepolia Testnet</span>
+    </div>
+    <h1>KTX Trường Bia Escrow</h1>
+    <p class="subtitle">Sàn ký quỹ hợp đồng thông minh cho sinh viên KTX mua bán đồ cũ minh bạch, loại bỏ hoàn toàn bùng cọc và lừa đảo.</p>
+  </header>
+
+  <div class="card">
+    <div class="card-title">
+      <span>📦 Chi Tiết Đơn Hàng & Ký Quỹ</span>
+      <span id="stateBadge" class="status-tag status-created">Created (Chờ nạp cọc)</span>
+    </div>
+
+    <!-- Hien thi mon hang thuc te -->
+    <div class="item-banner">
+      <div class="item-icon">🪑</div>
+      <div class="item-meta">
+        <h3>Bàn Học Gấp Gọn & Đèn Học Sinh Viên KTX</h3>
+        <p>Bàn gỗ gấp + Đèn LED chống cận phòng 304 Nhà B2 KTX Trường Bia (Đại học Huế)</p>
+      </div>
+    </div>
+
+    <!-- Bang thong tin doc tu View Functions cua ProjectCore.sol -->
+    <div class="data-grid">
+      <div class="data-cell">
+        <span class="label">Giá niêm yết (price - ETH)</span>
+        <span class="value highlight" id="priceDisplay">0.05 ETH (~125.000 VNĐ)</span>
+      </div>
+      <div class="data-cell">
+        <span class="label">Phí sàn KTX (PLATFORM_FEE_BPS)</span>
+        <span class="value" id="feeDisplay">100 bps (1%) · Quỹ KTX</span>
+      </div>
+      <div class="data-cell">
+        <span class="label">
+          <span>Người Bán (seller)</span>
+          <a id="linkSeller" href="https://sepolia.etherscan.io/address/0x9A2f3e827A9B1D56F62bB27357876805d214B14E" target="_blank" rel="noopener noreferrer" class="link-tag">Etherscan ↗</a>
+        </span>
+        <span class="value" id="sellerDisplay">0x9A2...B14E (Phòng 304 B2)</span>
+      </div>
+      <div class="data-cell">
+        <span class="label">
+          <span>Người Mua (buyer)</span>
+          <a id="linkBuyer" href="javascript:void(0)" class="link-tag" style="display: none;">Etherscan ↗</a>
+        </span>
+        <span class="value" id="buyerDisplay">Chưa có (Chờ nạp cọc)</span>
+      </div>
+      <div class="data-cell">
+        <span class="label">
+          <span>Trọng Tài KTX (arbiter)</span>
+          <a href="https://sepolia.etherscan.io/address/0x4D1aB68205C94a86F0763C5389E54964179A79A2" target="_blank" rel="noopener noreferrer" class="link-tag">Etherscan ↗</a>
+        </span>
+        <span class="value" id="arbiterDisplay">0x4D1...79A2 (BQL KTX)</span>
+      </div>
+      <div class="data-cell">
+        <span class="label">Thời hạn kiểm tra (deadline)</span>
+        <span class="value" id="deadlineDisplay">3 ngày sau khi nạp</span>
+      </div>
+      <div class="data-cell full-row">
+        <span class="label">
+          <span>Địa chỉ Smart Contract (`ProjectCore.sol`)</span>
+          <a href="https://sepolia.etherscan.io/address/0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D" target="_blank" rel="noopener noreferrer" class="link-tag" style="color: #60a5fa; font-weight: bold;">Mở trên Sepolia Etherscan ↗</a>
+        </span>
+        <span class="value" style="font-size: 0.82rem; color: #a5b4fc" id="contractAddressDisplay">0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D</span>
+      </div>
+      <div class="data-cell full-row">
+        <span class="label">
+          <span>Ví MetaMask Đang Kết Nối</span>
+          <span id="connectionStatus" style="color: #f59e0b; font-weight: 600;">Chưa kết nối</span>
+        </span>
+        <span class="value" id="walletDisplay" style="color: #cbd5e1">Vui lòng bấm nút kết nối ví bên dưới</span>
+      </div>
+    </div>
+
+    <!-- Khoi thao tac ghi: External Functions can xac nhan vi -->
+    <div class="actions-grid">
+      <button id="btnConnect" class="btn-connect full-row" onclick="connectWallet()">
+        🦊 Kết Nối Ví MetaMask
+      </button>
+
+      <button id="btnFund" class="btn-fund" onclick="handleFund()" disabled>
+        💰 1. Nạp Cọc 0.05 ETH (fund)
+      </button>
+
+      <button id="btnConfirm" class="btn-confirm" onclick="handleConfirm()" disabled>
+        ✅ 2. Nhận Hàng & Giải Ngân (confirmReceived)
+      </button>
+
+      <button id="btnClaimDeadline" class="btn-claim" onclick="handleClaimDeadline()" disabled>
+        ⏳ 3. Rút Tiền Quá Hạn (claimPaymentAfterDeadline)
+      </button>
+
+      <button id="btnDispute" class="btn-dispute" onclick="handleDispute()" disabled>
+        ⚠️ 4. Mở Khiếu Nại (raiseDispute)
+      </button>
+    </div>
+
+    <!-- Bang dieu khien danh rieng cho trong tai BQL KTX -->
+    <div class="arbiter-panel">
+      <h4>⚖️ Bảng Điều Khiển Trọng Tài (Ban Quản Lý KTX Trường Bia)</h4>
+      <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px;">
+        Gọi hàm <code>resolveDispute(decision)</code> khi đơn hàng ở trạng thái <code>Disputed</code>.
+      </p>
+      <div class="arbiter-buttons-row">
+        <button id="btnArbiterSeller" class="btn-confirm" style="flex: 1;" onclick="handleResolve(1)" disabled>
+          🏆 Phán Quyết 1: Seller Thắng (99% Seller, 1% Quỹ)
+        </button>
+        <button id="btnArbiterBuyer" class="btn-dispute" style="flex: 1;" onclick="handleResolve(2)" disabled>
+          🔄 Phán Quyết 2: Hoàn 100% Cọc Cho Buyer
+        </button>
+      </div>
+    </div>
+
+    <!-- Nhat ky hoat dong va giao dich on-chain -->
+    <div class="card-title" style="margin-top: 18px; font-size: 0.92rem;">
+      <span>📋 Nhật Ký Hoạt Động & Giao Dịch On-Chain</span>
+      <span style="font-size: 0.76rem; font-weight: normal; color: var(--text-muted)">Live Event Stream</span>
+    </div>
+    <div id="logBox" class="log-box">
+      <div class="log-entry log-info">
+        <span class="log-time">[00:00:00]</span> 
+        Sẵn sàng. Hãy bấm nút <strong>🦊 Kết Nối Ví MetaMask</strong> để bắt đầu tương tác với hợp đồng.
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Đồ án thực hành ECO2432 — Hệ thống Ký quỹ KTX Trường Bia K58 · <a href="https://github.com/hung532005-netizen/lap8-15-baocao" target="_blank" rel="noopener noreferrer">Xem GitHub Repository ↗</a></p>
+  </footer>
+</div>
+
+<script>
+  // =========================================================================
+  // 1. CAU HINH CONTRACT & THONG SO MANG SEPOLIA
+  // =========================================================================
+  const CONTRACT_ADDRESS = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
+  const SEPOLIA_CHAIN_ID_HEX = "0xaa36a7"; // 11155111 dang hex
+  const SEPOLIA_CHAIN_ID_DEC = 11155111n;  // 11155111 dang BigInt
+  const ETHERSCAN_TX_BASE = "https://sepolia.etherscan.io/tx/";
+  const ETHERSCAN_ADDR_BASE = "https://sepolia.etherscan.io/address/";
+
+  // ABI day du cua hop dong ProjectCore.sol
+  const CONTRACT_ABI = [
+    "function PLATFORM_FEE_BPS() view returns (uint256)",
+    "function BPS_DENOMINATOR() view returns (uint256)",
+    "function MIN_TRANSACTION_LIMIT() view returns (uint256)",
+    "function MAX_TRANSACTION_LIMIT() view returns (uint256)",
+    "function seller() view returns (address)",
+    "function arbiter() view returns (address)",
+    "function feeRecipient() view returns (address)",
+    "function buyer() view returns (address)",
+    "function price() view returns (uint256)",
+    "function deadline() view returns (uint256)",
+    "function state() view returns (uint8)",
+    "function fund() external payable",
+    "function confirmReceived() external",
+    "function claimPaymentAfterDeadline() external",
+    "function raiseDispute() external",
+    "function resolveDispute(uint8 decision) external",
+    "event Funded(address indexed buyer, uint256 amount, uint256 deadline)",
+    "event FeeCollected(address indexed recipient, uint256 amount)",
+    "event Completed(address indexed seller, uint256 payout, uint256 fee)",
+    "event Refunded(address indexed buyer, uint256 amount)",
+    "event Disputed(address indexed initiator)",
+    "event DisputeResolved(address indexed arbiter, uint8 decision, uint256 amount)"
+  ];
+
+  // Bien toan cuc quan ly Web3 provider va contract
+  let provider = null;
+  let signer = null;
+  let contractInstance = null;
+  let userAddress = null;
+  let currentContractPriceWei = 50000000000000000n; // Mac dinh 0.05 ETH neu chua doc duoc
+
+  const STATE_MAPPING = [
+    { text: "Created (Chờ nạp cọc)", class: "status-created" },
+    { text: "Funded (Đã khóa cọc)", class: "status-funded" },
+    { text: "Completed (Hoàn tất)", class: "status-completed" },
+    { text: "Refunded (Đã hoàn tiền)", class: "status-refunded" },
+    { text: "Disputed (Đang tranh chấp)", class: "status-disputed" }
+  ];
+
+  // =========================================================================
+  // 2. CAC HAM TIEN ICH GHI LOG VA CAP NHAT GIAO DIEN
+  // =========================================================================
+  function addLog(msg, type = "info", txHash = null) {
+    const box = document.getElementById("logBox");
+    const d = new Date();
+    const timeStr = `[${d.toTimeString().split(" ")[0]}]`;
+    const div = document.createElement("div");
+    div.className = `log-entry log-${type}`;
+
+    let txLinkHtml = "";
+    if (txHash) {
+      txLinkHtml = ` · <a href="${ETHERSCAN_TX_BASE}${txHash}" target="_blank" rel="noopener noreferrer" style="color: #60a5fa; text-decoration: underline; font-weight: bold;">Xem Tx trên Etherscan ↗</a>`;
+    }
+
+    div.innerHTML = `<span class="log-time">${timeStr}</span> ${msg}${txLinkHtml}`;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function formatShortAddress(addr) {
+    if (!addr || addr.length < 10) return addr;
+    return addr.slice(0, 6) + "..." + addr.slice(-4);
+  }
+
+  function updateActionButtons(stateIndex) {
+    const isConnected = !!userAddress;
+    const isFunded = (stateIndex === 1);
+    const isDisputed = (stateIndex === 4);
+
+    document.getElementById("btnFund").disabled = !isConnected || (stateIndex !== 0);
+    document.getElementById("btnConfirm").disabled = !isConnected || !isFunded;
+    document.getElementById("btnClaimDeadline").disabled = !isConnected || !isFunded;
+    document.getElementById("btnDispute").disabled = !isConnected || !isFunded;
+    document.getElementById("btnArbiterSeller").disabled = !isConnected || !isDisputed;
+    document.getElementById("btnArbiterBuyer").disabled = !isConnected || !isDisputed;
+  }
+
+  // =========================================================================
+  // 3. LUONG KIEM TRA VA KET NOI VI METAMASK CHUAN XAC
+  // =========================================================================
+  
+  // Kiem tra cai dat vi MetaMask
+  function isMetaMaskInstalled() {
+    return Boolean(window.ethereum && window.ethereum.isMetaMask);
+  }
+
+  // Tu dong chuyen hoac them mang Sepolia
+  async function checkAndSwitchNetwork() {
+    try {
+      const currentChainHex = await window.ethereum.request({ method: "eth_chainId" });
+      if (currentChainHex.toLowerCase() !== SEPOLIA_CHAIN_ID_HEX.toLowerCase()) {
+        addLog("Vi chua o mang Sepolia! Dang yeu cau MetaMask chuyen sang Sepolia...", "info");
+        try {
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: SEPOLIA_CHAIN_ID_HEX }]
+          });
+          addLog("Da chuyen sang mang Sepolia thanh cong!", "success");
+        } catch (switchError) {
+          // Ma loi 4902: Mang Sepolia chua duoc them vao vi
+          if (switchError.code === 4902) {
+            addLog("Mang Sepolia chua co trong vi. Dang gui yeu cau them mang...", "info");
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [{
+                chainId: SEPOLIA_CHAIN_ID_HEX,
+                chainName: "Sepolia Test Network",
+                nativeCurrency: { name: "Sepolia ETH", symbol: "ETH", decimals: 18 },
+                rpcUrls: ["https://rpc.sepolia.org", "https://ethereum-sepolia-rpc.publicnode.com"],
+                blockExplorerUrls: ["https://sepolia.etherscan.io"]
+              }]
+            });
+            addLog("Da them va chuyen sang mang Sepolia!", "success");
+          } else {
+            throw switchError;
+          }
+        }
+      }
+      return true;
+    } catch (err) {
+      if (err.code === 4001) {
+        addLog("Nguoi dung tu choi chuyen mang sang Sepolia tren MetaMask (Loi 4001).", "error");
+      } else {
+        addLog("Loi khi chuyen mang Sepolia: " + (err.message || err), "error");
+      }
+      return false;
+    }
+  }
+
+  // Ham ket noi vi chinh
+  async function connectWallet() {
+    // 1. Kiem tra cai dat vi
+    if (!isMetaMaskInstalled()) {
+      alert("Chua phat hien vi MetaMask! Vui long cai dat tien ich MetaMask tai metamask.io/download");
+      addLog("Loi: window.ethereum khong ton tai. Vui long cai dat MetaMask.", "error");
+      window.open("https://metamask.io/download/", "_blank");
+      return;
+    }
+
+    try {
+      addLog("Dang yeu cau ket noi vi MetaMask...", "info");
+
+      // 2. Kiem tra va chuyen sang mang Sepolia truoc
+      const networkOk = await checkAndSwitchNetwork();
+      if (!networkOk) return;
+
+      // 3. Goi truc tiep eth_requestAccounts
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      if (!accounts || accounts.length === 0) {
+        addLog("Khong co tai khoan nao duoc chon.", "error");
+        return;
+      }
+
+      // 4. Khoi tao Ethers BrowserProvider va Signer
+      provider = new ethers.BrowserProvider(window.ethereum);
+      signer = await provider.getSigner();
+      userAddress = await signer.getAddress();
+
+      // 5. Khoi tao contract instance voi signer
+      contractInstance = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+      // 6. Cap nhat giao dien
+      document.getElementById("connectionStatus").textContent = "Đã Kết Nối";
+      document.getElementById("connectionStatus").style.color = "#10b981";
+      document.getElementById("walletDisplay").textContent = `${formatShortAddress(userAddress)} (${userAddress})`;
+      
+      const btnConnect = document.getElementById("btnConnect");
+      btnConnect.innerHTML = `🦊 Đã Kết Nối: ${formatShortAddress(userAddress)}`;
+      btnConnect.classList.replace("btn-connect", "btn-claim");
+
+      addLog(`Ket noi thanh cong vi: ${userAddress}`, "success");
+
+      // 7. Doc du lieu thuc te tu Smart Contract
+      await loadContractData();
+
+    } catch (err) {
+      // 8. Xu ly bat loi nguoi dung tu choi (Ma loi 4001)
+      if (err.code === 4001) {
+        addLog("Ban da huy yeu cau ket noi vi tren MetaMask (Loi 4001 - User Rejected Request).", "error");
+      } else {
+        addLog("Ket noi vi that bai: " + (err.shortMessage || err.message || err), "error");
+      }
+    }
+  }
+
+  // =========================================================================
+  // 4. DOC DU LIEU TU SMART CONTRACT (VIEW FUNCTIONS)
+  // =========================================================================
+  async function loadContractData() {
+    if (!contractInstance) return;
+    try {
+      addLog("Dang doc du lieu trang thai tu Smart Contract on-chain...", "info");
+
+      // Doc state, price, seller, buyer, arbiter, feeRecipient, PLATFORM_FEE_BPS
+      const [rawState, rawPrice, rawSeller, rawBuyer, rawArbiter, rawFeeRecipient, rawFeeBps, rawDeadline] = await Promise.all([
+        contractInstance.state(),
+        contractInstance.price(),
+        contractInstance.seller(),
+        contractInstance.buyer(),
+        contractInstance.arbiter(),
+        contractInstance.feeRecipient(),
+        contractInstance.PLATFORM_FEE_BPS(),
+        contractInstance.deadline()
+      ]);
+
+      const stateIndex = Number(rawState);
+      currentContractPriceWei = rawPrice;
+
+      // Doi Wei sang ETH truoc khi hien thi theo AGENTS.md
+      const priceEth = ethers.formatEther(rawPrice);
+      document.getElementById("priceDisplay").textContent = `${priceEth} ETH (~125.000 VNĐ)`;
+
+      // Cap nhat ty le phi basis points (1% = 100 bps)
+      document.getElementById("feeDisplay").textContent = `${rawFeeBps.toString()} bps (1%) · Quy KTX`;
+
+      // Hien thi dia chi rut gon cac ben
+      document.getElementById("sellerDisplay").textContent = `${formatShortAddress(rawSeller)} (Seller)`;
+      document.getElementById("linkSeller").href = `${ETHERSCAN_ADDR_BASE}${rawSeller}`;
+
+      if (rawBuyer && rawBuyer !== ethers.ZeroAddress) {
+        document.getElementById("buyerDisplay").textContent = `${formatShortAddress(rawBuyer)} (Buyer)`;
+        const linkBuyer = document.getElementById("linkBuyer");
+        linkBuyer.style.display = "inline-flex";
+        linkBuyer.href = `${ETHERSCAN_ADDR_BASE}${rawBuyer}`;
+      } else {
+        document.getElementById("buyerDisplay").textContent = "Chua co (Cho nap coc)";
+        document.getElementById("linkBuyer").style.display = "none";
+      }
+
+      document.getElementById("arbiterDisplay").textContent = `${formatShortAddress(rawArbiter)} (BQL KTX)`;
+
+      // Cap nhat thoi han deadline
+      const deadlineSec = Number(rawDeadline);
+      if (deadlineSec > 0) {
+        const d = new Date(deadlineSec * 1000);
+        document.getElementById("deadlineDisplay").textContent = d.toLocaleString("vi-VN");
+      } else {
+        document.getElementById("deadlineDisplay").textContent = "3 ngay sau khi nap";
+      }
+
+      // Cap nhat badge trang thai
+      const badge = document.getElementById("stateBadge");
+      const info = STATE_MAPPING[stateIndex] || STATE_MAPPING[0];
+      badge.className = `status-tag ${info.class}`;
+      badge.textContent = info.text;
+
+      // Cap nhat trang thai cac nut hanh dong
+      updateActionButtons(stateIndex);
+
+      addLog(`Da dong bo du lieu contract thanh cong! Trang thai: ${info.text}`, "success");
+    } catch (err) {
+      addLog("Loi khi doc du lieu contract: " + (err.shortMessage || err.message), "error");
+      // Neu chua deploy hoac chua co tren mang, giu UI an toan
+      updateActionButtons(0);
+    }
+  }
+
+  // =========================================================================
+  // 5. DICH MA LOI CUSTOM ERROR TIENG VIET THUAN TIEN
+  // =========================================================================
+  function translateError(err) {
+    if (err.code === 4001 || (err.message && err.message.includes("rejected"))) {
+      return "Ban da huy xac nhan giao dich tren MetaMask (Loi 4001).";
+    }
+    const str = (err.shortMessage || err.message || "").toString();
+    if (str.includes("SellerCannotBeBuyer")) return "Nguoi ban khong the tu nap coc mua hang cua chinh minh (Chong Wash Trading)!";
+    if (str.includes("NotBuyer")) return "Chi Nguoi Mua moi co quyen bam xac nhan nhan hang!";
+    if (str.includes("NotArbiter")) return "Chi Ban quan ly KTX (Trong tai) moi co quyen phan quyet tranh chap!";
+    if (str.includes("NotParty")) return "Ke la khong phai buyer/seller khong the mo tranh chap!";
+    if (str.includes("DeadlineNotReached")) return "Chua het thoi han 3 ngay kiem tra hang, Nguoi ban chua the rut tien qua han!";
+    if (str.includes("DeadlinePassed")) return "Da qua thoi han kiem tra, khong the mo tranh chap!";
+    if (str.includes("WrongAmount")) return "So tien coc nap vao khong khop voi gia niem yet!";
+    if (str.includes("WrongState")) return "Trang thai hop dong hien tai khong cho phep thao tac nay!";
+    return str;
+  }
+
+  // =========================================================================
+  // 6. CAC HAM GHI THAO TAC (EXTERNAL FUNCTIONS)
+  // =========================================================================
+
+  // 1. Nap coc 100% (fund)
+  async function handleFund() {
+    if (!contractInstance) return;
+    const btn = document.getElementById("btnFund");
+    btn.disabled = true;
+    btn.innerHTML = "⏳ Đang gửi giao dịch fund()...";
+
+    try {
+      addLog("Dang goi ham fund() qua MetaMask...", "info");
+      const tx = await contractInstance.fund({ value: currentContractPriceWei });
+      addLog(`Giao dich da gui: ${tx.hash}. Dang cho xac nhan...`, "info", tx.hash);
+      await tx.wait();
+      addLog("Nap coc thanh cong! Hop dong da chuyen sang Funded.", "success", tx.hash);
+      await loadContractData();
+    } catch (err) {
+      addLog("Nap coc that bai: " + translateError(err), "error");
+    } finally {
+      btn.innerHTML = "💰 1. Nạp Cọc 0.05 ETH (fund)";
+      updateActionButtons(1);
+    }
+  }
+
+  // 2. Xac nhan nhan hang va giai ngan 99% seller, 1% quy (confirmReceived)
+  async function handleConfirm() {
+    if (!contractInstance) return;
+    const btn = document.getElementById("btnConfirm");
+    btn.disabled = true;
+    btn.innerHTML = "⏳ Đang giải ngân...";
+
+    try {
+      addLog("Dang goi ham confirmReceived()...", "info");
+      const tx = await contractInstance.confirmReceived();
+      addLog(`Giao dich da gui: ${tx.hash}`, "info", tx.hash);
+      await tx.wait();
+      addLog("Giai ngan thanh cong! 99% da ve tay nguoi ban, 1% trich ve Quy KTX.", "success", tx.hash);
+      await loadContractData();
+    } catch (err) {
+      addLog("Giai ngan that bai: " + translateError(err), "error");
+    } finally {
+      btn.innerHTML = "✅ 2. Nhận Hàng & Giải Ngân (confirmReceived)";
+      updateActionButtons(2);
+    }
+  }
+
+  // 3. Nguoi ban rut tien qua han 3 ngay (claimPaymentAfterDeadline)
+  async function handleClaimDeadline() {
+    if (!contractInstance) return;
+    try {
+      addLog("Dang goi claimPaymentAfterDeadline()...", "info");
+      const tx = await contractInstance.claimPaymentAfterDeadline();
+      addLog(`Giao dich da gui: ${tx.hash}`, "info", tx.hash);
+      await tx.wait();
+      addLog("Giai ngan qua han thanh cong!", "success", tx.hash);
+      await loadContractData();
+    } catch (err) {
+      addLog("Bi chan dung quy tac: " + translateError(err), "error");
+    }
+  }
+
+  // 4. Mo tranh chap (raiseDispute)
+  async function handleDispute() {
+    if (!contractInstance) return;
+    try {
+      addLog("Dang goi raiseDispute()...", "info");
+      const tx = await contractInstance.raiseDispute();
+      addLog(`Giao dich da gui: ${tx.hash}`, "info", tx.hash);
+      await tx.wait();
+      addLog("Da mo khieu nai tranh chap on-chain! Chuyen ho so sang BQL KTX.", "error", tx.hash);
+      await loadContractData();
+    } catch (err) {
+      addLog("Mo tranh chap that bai: " + translateError(err), "error");
+    }
+  }
+
+  // 5. Trong tai BQL KTX phan quyet (resolveDispute)
+  async function handleResolve(decision) {
+    if (!contractInstance) return;
+    try {
+      addLog(`Trong tai dang phan quyet: Quyet dinh ${decision}...`, "info");
+      const tx = await contractInstance.resolveDispute(decision);
+      addLog(`Giao dich da gui: ${tx.hash}`, "info", tx.hash);
+      await tx.wait();
+      addLog(`Trong tai da phan quyet thanh cong! Quyet dinh: ${decision === 1 ? 'Seller thang' : 'Hoan tra Buyer'}.`, "success", tx.hash);
+      await loadContractData();
+    } catch (err) {
+      addLog("Phan quyet that bai: " + translateError(err), "error");
+    }
+  }
+
+  // =========================================================================
+  // 7. DANG KY EVENT LISTENERS CUA METAMASK (STEP 4)
+  // =========================================================================
+  if (window.ethereum) {
+    // 1. Lang nghe khi nguoi dung doi tai khoan vi
+    window.ethereum.on("accountsChanged", async (accounts) => {
+      if (!accounts || accounts.length === 0) {
+        addLog("Nguoi dung da ngat ket noi vi tren MetaMask.", "info");
+        userAddress = null;
+        signer = null;
+        contractInstance = null;
+        document.getElementById("connectionStatus").textContent = "Đã Ngắt Kết Nối";
+        document.getElementById("connectionStatus").style.color = "#ef4444";
+        document.getElementById("walletDisplay").textContent = "Vui lòng kết nối lại ví";
+        document.getElementById("btnConnect").innerHTML = "🦊 Kết Nối Ví MetaMask";
+        document.getElementById("btnConnect").classList.replace("btn-claim", "btn-connect");
+        updateActionButtons(0);
+      } else {
+        userAddress = accounts[0];
+        addLog(`Nguoi dung da chuyen sang vi moi: ${userAddress}`, "info");
+        document.getElementById("walletDisplay").textContent = `${formatShortAddress(userAddress)} (${userAddress})`;
+        document.getElementById("btnConnect").innerHTML = `🦊 Đã Kết Nối: ${formatShortAddress(userAddress)}`;
+        if (provider) {
+          signer = await provider.getSigner();
+          contractInstance = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+          await loadContractData();
+        }
+      }
+    });
+
+    // 2. Lang nghe khi nguoi dung doi mang (chainChanged) -> Tai lai trang de dong bo
+    window.ethereum.on("chainChanged", (chainId) => {
+      addLog(`Phat hien doi mang (Chain ID: ${chainId}). Dang tai lai trang...`, "info");
+      window.location.reload();
+    });
+  }
+
+  // Khoi chay khi trang web duoc tai
+  window.addEventListener("DOMContentLoaded", () => {
+    updateActionButtons(0);
+    if (isMetaMaskInstalled()) {
+      addLog("Da phat hien vi MetaMask san sang tren trinh duyet.", "info");
+    } else {
+      addLog("Chua phat hien vi MetaMask. Vui long cai dat de trai nghiem.", "error");
+    }
+  });
+</script>
+</body>
+</html>
