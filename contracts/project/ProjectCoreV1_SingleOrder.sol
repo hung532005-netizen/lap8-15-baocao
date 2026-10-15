@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 /// @title KTX Truong Bia Escrow - Hop dong ky quy mua ban do cu sinh vien
 /// @notice Thuoc de tai 1 (Phan N) - Mon hoc ECO2432 Web3 Starter
 /// @dev Duoi 150 dong theo quy chuan, ap dung CEI va ReentrancyGuard.
-contract ProjectCore is ReentrancyGuard {
+contract ProjectCoreV1_SingleOrder is ReentrancyGuard {
     enum State { Created, Funded, Completed, Refunded, Disputed }
 
     // Hang so kinh te: Phi nen tang 1% = 100 basis points (1% = 100 / 10000)

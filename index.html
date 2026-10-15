@@ -2206,11 +2206,18 @@
   </footer>
 
 </div>
+<!-- Nhúng cấu hình hợp đồng được đồng bộ tự động từ Hardhat -->
+<script src="./contract-config.js"></script>
 <script>
   // =========================================================================
-  // PROJECTCORE MULTI-ORDER ESCROW ABI (MUC 22 & 23 - ETHERS.JS V6)
+  // PROJECTCORE MULTI-ORDER ESCROW ABI & CONTRACT CONFIG (ETHERS.JS V6)
   // =========================================================================
-  const PROJECT_CORE_ABI = [
+  const CONTRACT_ADDRESS =
+    window.KTX_CONTRACT_CONFIG?.contractAddress || "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
+
+  const PROJECT_CORE_ABI = (window.KTX_CONTRACT_CONFIG?.abi && window.KTX_CONTRACT_CONFIG.abi.length > 0)
+    ? window.KTX_CONTRACT_CONFIG.abi
+    : [
     "function owner() view returns (address)",
     "function arbiter() view returns (address)",
     "function platformFeeBps() view returns (uint16)",
@@ -2330,7 +2337,7 @@
   // MODULE 1: CAU HINH HE THONG (ConfigManager)
   // =========================================================================
   const ConfigManager = {
-    CONTRACT_ADDRESS: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+    CONTRACT_ADDRESS: CONTRACT_ADDRESS,
     EXPECTED_CHAIN_ID_HEX: "0xaa36a7", // 11155111 dang hex
     EXPECTED_CHAIN_ID_DEC: 11155111n,  // 11155111 dang BigInt
     EXPLORER_BASE_URL: "https://sepolia.etherscan.io/",

@@ -1,8 +1,12 @@
 {
-  "name": "hce-web3-starter",
+  "name": "ktx-truong-bia-smart-contract",
+  "version": "2.0.0",
   "private": true,
-  "description": "ECO2432 starter kit. Optional: run npm install so local editors resolve OpenZeppelin imports; Remix IDE resolves them automatically.",
+  "description": "ECO2432 starter kit & KTX Truong Bia Multi-Order Escrow Hardhat toolkit",
   "scripts": {
+    "compile": "npx hardhat compile",
+    "deploy:sepolia": "npx hardhat run scripts/deploy-and-sync.js --network sepolia",
+    "deploy:local": "npx hardhat run scripts/deploy-and-sync.js --network localhost",
     "test": "python evidence/lab-11/economic_model_verification.py && python evidence/lab-13/reentrancy_simulation.py && python evidence/lab-14/peer_audit_simulation.py",
     "test:lab11": "python evidence/lab-11/economic_model_verification.py",
     "test:lab13": "python evidence/lab-13/reentrancy_simulation.py",
@@ -10,5 +14,10 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.0"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "dotenv": "^16.4.5",
+    "hardhat": "^2.22.10"
   }
 }

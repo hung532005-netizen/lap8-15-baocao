@@ -91,7 +91,7 @@ contract ProjectCore {
         uint256 indexed orderId,
         bytes32 indexed listingKey,
         address indexed buyer,
-        address indexed seller,
+        address seller,
         uint256 sellerPayout,
         uint256 platformFee
     );
